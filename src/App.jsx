@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 
 /**
- * MashBond — 4 pages with bilingual toggle (EN ⇄ ZH)
- * Pages: Home, About, Services, Contact
- * Hash routes: #/, #/about, #/services, #/contact
- * Light two-color theme (white + sky). Photos optional.
+ * MashBond — 4 pages + Member Upload, bilingual (EN ⇄ ZH)
+ * Pages: Home, About, Services, Contact, Member Upload
+ * Hash routes: #/, #/about, #/services, #/contact, #/member-upload
+ * Light two-color theme (white + indigo)
  *
- * Optional images you can add later to /public/images/:
- * - hero.jpg   (homepage visual)
+ * Notes:
+ * - Member Upload: basic client-side preview (no backend storage yet).
+ * - Optional hero image: /public/images/hero.jpg (safe to omit).
  */
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
 /* ---------------------------- Router & Layout ---------------------------- */
 function Router() {
   const [route, setRoute] = useState(getRoute());
-  const [lang, setLang] = useState("en"); // default English (change to "zh" if you prefer)
+  const [lang, setLang] = useState("en"); // default English
   const t = getT(lang);
 
   useEffect(() => {
@@ -48,8 +49,9 @@ function Router() {
           </div>
         </PageShell>
       )}
+      {route === "member-upload" && <MemberUpload t={t} />}
       {route === "contact" && <Contact t={t} />}
-      {!["home", "about", "services", "contact"].includes(route) && (
+      {!["home", "about", "services", "contact", "member-upload"].includes(route) && (
         <PageShell title="404">
           <p className="mt-4 text-gray-700">Page not found.</p>
         </PageShell>
@@ -60,7 +62,6 @@ function Router() {
 }
 
 function getRoute() {
-  // routes as #/about, #/services, default -> home
   const hash = (window.location.hash || "").replace(/^#\/?/, "");
   return hash || "home";
 }
@@ -70,15 +71,16 @@ function Header({ t, lang, setLang }) {
     <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-sky-600" aria-hidden />
+          <div className="h-8 w-8 rounded-full bg-indigo-600" aria-hidden />
           <a href="#/" className="font-semibold tracking-wide">
             MashBond
           </a>
         </div>
         <nav className="hidden items-center gap-6 text-sm md:flex">
-          <a href="#/about" className="hover:text-sky-700">{t.nav_about}</a>
-          <a href="#/services" className="hover:text-sky-700">{t.nav_services}</a>
-          <a href="#/contact" className="hover:text-sky-700">{t.nav_contact}</a>
+          <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
+          <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
+          <a href="#/member-upload" className="hover:text-indigo-700">{t.nav_member}</a>
+          <a href="#/contact" className="hover:text-indigo-700">{t.nav_contact}</a>
         </nav>
         <div className="flex items-center gap-3">
           <button
@@ -88,7 +90,7 @@ function Header({ t, lang, setLang }) {
             {lang === "zh" ? "English" : "简体中文"}
           </button>
           <a
-            className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white"
+            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white"
             href="#/contact"
           >
             {t.contact_cta}
@@ -107,9 +109,10 @@ function Footer() {
           © {new Date().getFullYear()} MashBond. All rights reserved.
         </p>
         <div className="flex items-center gap-4 text-sm">
-          <a href="#/about" className="hover:text-sky-700">About</a>
-          <a href="#/services" className="hover:text-sky-700">Services</a>
-          <a href="#/contact" className="hover:text-sky-700">Contact</a>
+          <a href="#/about" className="hover:text-indigo-700">About</a>
+          <a href="#/services" className="hover:text-indigo-700">Services</a>
+          <a href="#/member-upload" className="hover:text-indigo-700">Member Upload</a>
+          <a href="#/contact" className="hover:text-indigo-700">Contact</a>
         </div>
       </div>
     </footer>
@@ -121,10 +124,10 @@ function Home({ t }) {
   return (
     <>
       {/* Hero */}
-      <section className="border-b border-gray-100 bg-gradient-to-b from-sky-50 to-white">
+      <section className="border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-sky-700">
+            <p className="text-xs uppercase tracking-[0.25em] text-indigo-700">
               {t.tagline}
             </p>
             <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
@@ -132,15 +135,15 @@ function Home({ t }) {
             </h1>
             <p className="mt-5 max-w-xl text-gray-600">{t.hero_sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a className="rounded-xl bg-sky-600 px-5 py-3 text-white" href="#/services">
+              <a className="rounded-xl bg-indigo-600 px-5 py-3 text-white" href="#/services">
                 {t.primary_cta}
               </a>
-              <a className="rounded-xl border border-sky-200 px-5 py-3 text-sky-700" href="#/about">
+              <a className="rounded-xl border border-indigo-200 px-5 py-3 text-indigo-700" href="#/about">
                 {t.secondary_cta}
               </a>
             </div>
           </div>
-          <div className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
             {/* Optional hero image if you add /public/images/hero.jpg */}
             <img
               src="/images/hero.jpg"
@@ -171,6 +174,84 @@ function Home({ t }) {
   );
 }
 
+function MemberUpload({ t }) {
+  const [files, setFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
+
+  function onSelect(e) {
+    const fs = Array.from(e.target.files || []);
+    setFiles(fs);
+    // build previews
+    const readers = fs.map(
+      (f) =>
+        new Promise((res) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => res({ name: f.name, src: ev.target.result });
+          reader.readAsDataURL(f);
+        })
+    );
+    Promise.all(readers).then(setPreviews);
+  }
+
+  function clearAll() {
+    setFiles([]);
+    setPreviews([]);
+    const input = document.getElementById("member-files");
+    if (input) input.value = "";
+  }
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-16">
+      <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{t.member_title}</h2>
+      <p className="mt-4 max-w-3xl text-gray-700">{t.member_blurb}</p>
+
+      <div className="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+        <label className="block text-sm font-medium text-gray-700">{t.upload_select}</label>
+        <input
+          id="member-files"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={onSelect}
+          className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-indigo-600 focus:outline-none"
+        />
+        <p className="mt-2 text-xs text-gray-500">{t.upload_hint}</p>
+
+        {previews.length > 0 && (
+          <>
+            <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {previews.map((p) => (
+                <div key={p.name} className="overflow-hidden rounded-xl border border-gray-100">
+                  <img src={p.src} alt={p.name} className="aspect-square w-full object-cover" />
+                  <div className="truncate px-2 py-1 text-xs text-gray-600">{p.name}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={clearAll}
+                className="rounded-xl border border-indigo-200 px-4 py-2 text-indigo-700 hover:bg-indigo-50"
+              >
+                {t.upload_clear}
+              </button>
+              {/* Placeholder action button for future backend */}
+              <button
+                type="button"
+                className="rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+                title="This is a demo; no files are uploaded yet."
+                onClick={() => alert(t.upload_demo_alert)}
+              >
+                {t.upload_submit}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function Contact({ t }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-16">
@@ -185,12 +266,12 @@ function Contact({ t }) {
             <li>{t.contact_address}: Los Angeles · USA</li>
           </ul>
         </div>
-        <form className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+        <form className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
           <label className="block text-sm font-medium text-gray-700">
             {t.form_name}
           </label>
           <input
-            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-sky-600 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-indigo-600 focus:outline-none"
             placeholder={t.form_name_ph}
           />
           <label className="mt-4 block text-sm font-medium text-gray-700">
@@ -198,19 +279,19 @@ function Contact({ t }) {
           </label>
           <input
             type="email"
-            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-sky-600 focus:outline-none"
+            className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-indigo-600 focus:outline-none"
             placeholder={t.form_email_ph}
           />
           <label className="mt-4 block text-sm font-medium text-gray-700">
             {t.form_need}
           </label>
           <textarea
-            className="mt-1 h-28 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-sky-600 focus:outline-none"
+            className="mt-1 h-28 w-full rounded-xl border border-gray-200 px-3 py-2 focus:border-indigo-600 focus:outline-none"
             placeholder={t.form_need_ph}
           />
           <button
             type="button"
-            className="mt-6 w-full rounded-xl bg-sky-600 px-4 py-3 font-medium text-white hover:bg-sky-700"
+            className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-700"
           >
             {t.form_submit}
           </button>
@@ -223,7 +304,7 @@ function Contact({ t }) {
 /* ------------------------------- UI Helpers ------------------------------ */
 function PageShell({ title, children, bg, padded }) {
   return (
-    <section className={bg ? "bg-sky-50/50" : ""}>
+    <section className={bg ? "bg-indigo-50/50" : ""}>
       <div className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{title}</h2>
         <div className={padded ? "mt-8" : ""}>{children}</div>
@@ -234,7 +315,7 @@ function PageShell({ title, children, bg, padded }) {
 
 function Card({ title, desc }) {
   return (
-    <div className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
       <h3 className="font-semibold text-gray-900">{title}</h3>
       <p className="mt-2 text-gray-700">{desc}</p>
     </div>
@@ -244,7 +325,7 @@ function Card({ title, desc }) {
 function InfoCard({ label, value }) {
   return (
     <li className="rounded-xl border border-gray-100 p-4">
-      <p className="text-xs text-sky-700">{label}</p>
+      <p className="text-xs text-indigo-700">{label}</p>
       <p className="mt-1 font-medium">{value}</p>
     </li>
   );
@@ -256,6 +337,7 @@ const i18n = {
     // nav
     nav_about: "关于我们",
     nav_services: "业务板块",
+    nav_member: "会员上传",
     nav_contact: "联系我们",
 
     // hero / ctas
@@ -314,12 +396,22 @@ const i18n = {
     form_email_ph: "you@example.com",
     form_need_ph: "请告诉我们您的品牌与目标",
     form_submit: "提交",
+
+    // Member upload
+    member_title: "会员上传",
+    member_blurb: "选择图片进行预览。此为演示版本，目前不会保存到服务器。后续可接入云存储或邮箱投递。",
+    upload_select: "选择图片文件（可多选）",
+    upload_hint: "仅本地预览，不会上传到服务器。",
+    upload_clear: "清空",
+    upload_submit: "发送（演示）",
+    upload_demo_alert: "演示模式：目前不会上传。可后续接入 Cloudinary、S3 或邮件投递。",
   },
 
   en: {
     // nav
     nav_about: "About",
     nav_services: "Services",
+    nav_member: "Member Upload",
     nav_contact: "Contact",
 
     // hero / ctas
@@ -389,6 +481,17 @@ const i18n = {
     form_email_ph: "you@example.com",
     form_need_ph: "Tell us about your brand & goals",
     form_submit: "Send",
+
+    // Member upload
+    member_title: "Member Upload",
+    member_blurb:
+      "Select images to preview. This demo does not store files yet. We can connect cloud storage or email submission next.",
+    upload_select: "Choose image files (multi-select)",
+    upload_hint: "Local preview only — nothing is uploaded.",
+    upload_clear: "Clear",
+    upload_submit: "Send (Demo)",
+    upload_demo_alert:
+      "Demo mode: nothing will be uploaded. We can wire Cloudinary, S3, or email delivery later.",
   },
 };
 
