@@ -6,7 +6,9 @@ import React, { useEffect, useState } from "react";
  * - Router: hash (#/about, #/services, #/member-upload, #/contact)
  * - Theme: light, two-color (white + indigo)
  * - i18n: English ⇄ 简体中文 (toggle in header)
- * - Hero: forced two-line title (line 2 is always “让亚洲在此发光” in ZH)
+ * - Hero:
+ *     - ZH: forced two-line (line 2 is always “让亚洲在此发光”)
+ *     - EN: single line, "Shine Globally" kept together on the same line
  * - Images optional; if /public/images/hero.jpg doesn’t exist, it hides gracefully
  */
 
@@ -29,7 +31,7 @@ function Router() {
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <Header t={t} lang={lang} setLang={setLang} />
-      {route === "home" && <Home t={t} />}
+      {route === "home" && <Home t={t} lang={lang} />}
       {route === "about" && <About t={t} />}
       {route === "services" && <Services t={t} />}
       {route === "member-upload" && <MemberUpload t={t} />}
@@ -96,7 +98,7 @@ function Footer({ t }) {
 }
 
 /* --------------------------------- Pages -------------------------------- */
-function Home({ t }) {
+function Home({ t, lang }) {
   return (
     <>
       {/* Hero */}
@@ -105,11 +107,20 @@ function Home({ t }) {
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-indigo-700">{t.tagline}</p>
 
-            {/* Two-line heading */}
-            <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
-              <span>{t.hero_line1}</span>
-              <span className="block">{t.hero_line2}</span>
-            </h1>
+            {/* Headline:
+                - zh: two lines
+                - en: single line with “Shine Globally” kept together */}
+            {lang === "zh" ? (
+              <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
+                <span>{t.hero_line1}</span>
+                <span className="block">{t.hero_line2}</span>
+              </h1>
+            ) : (
+              <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
+                <span>{t.hero_inline_left}</span>
+                <span className="whitespace-nowrap">{t.hero_inline_right}</span>
+              </h1>
+            )}
 
             <p className="mt-5 max-w-xl text-gray-600">{t.hero_sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -392,13 +403,14 @@ const i18n = {
     nav_member: "Member Upload",
     nav_contact: "Contact",
 
-    // CTAs / hero (two-line for ZH; EN stays one headline)
+    // CTAs / hero
     contact_cta: "Contact Us",
     primary_cta: "View Services",
     secondary_cta: "About Us",
     tagline: "Consulting First · S2B2C Cross-Border Ecosystem",
-    hero_line1: "MashBond — Let Asia Shine",
-    hero_line2: "Globally", // EN version; kept split for symmetry but displays as two lines too
+    // EN headline rendered as one line:
+    hero_inline_left: "MashBond — Let Asia ",
+    hero_inline_right: "Shine Globally",
     hero_sub: "Mission: Empower · Connect · Grow | Core Principle: Enable first, grow together.",
 
     // KV cards
