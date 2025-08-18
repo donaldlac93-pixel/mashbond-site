@@ -6,38 +6,36 @@ import React, { useEffect, useState } from "react";
  * - Router: hash (#/about, #/services, #/member-upload, #/contact)
  * - Theme: light, two-color (white + indigo)
  * - i18n: English ⇄ 简体中文 (toggle in header)
- * - Hero:
- *     - ZH: forced two-line (line 2 is always “让亚洲在此发光”)
- *     - EN: single line, "Shine Globally" kept together on the same line
- * - Icons: embedded SVG React components (no extra files required)
+ * - FIX: Icons now size via Tailwind (no overlap). SVGs accept className.
  */
 
 /* ------------------------------- ICONS ---------------------------------- */
-// 24x24 line icons (indigo) — techy style
+// Techy line icons (indigo). Now responsive: className controls size.
 const stroke = "#4f46e5";
 const sw = 1.5;
-const IconGlobeWire = (props) => (
-  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+
+const IconGlobeWire = ({ className = "h-8 w-8", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <circle cx="12" cy="12" r="9" />
     <path d="M3 12h18M12 3a16 16 0 0 1 0 18M12 3a16 16 0 0 0 0 18" />
     <path d="M7.8 7.8l2.4 2.4m3.6 3.6l2.4 2.4M16.2 7.8 13.8 10.2M7.8 16.2 10.2 13.8" />
   </svg>
 );
-const IconChipAI = (props) => (
-  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconChipAI = ({ className = "h-10 w-10", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="6" y="6" width="12" height="12" rx="2" />
     <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
     <path d="M9 14.5V9.5h1.8l.7 1.8.7-1.8H14v5h-1.2v-2l-.5 1.3h-.7L11 12.5v2z" />
   </svg>
 );
-const IconAPIPlug = (props) => (
-  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconAPIPlug = ({ className = "h-10 w-10", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="3" y="7" width="10" height="10" rx="2" />
     <path d="M13 12h8M19 9v6" />
   </svg>
 );
-const IconAnalyticsLine = (props) => (
-  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconAnalyticsLine = ({ className = "h-10 w-10", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M3 20h18" />
     <path d="M5 16l4-5 4 3 6-7" />
     <circle cx="9" cy="11" r="1" />
@@ -45,33 +43,34 @@ const IconAnalyticsLine = (props) => (
     <circle cx="19" cy="7" r="1" />
   </svg>
 );
-const IconDroneBox = (props) => (
-  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconDroneBox = ({ className = "h-10 w-10", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="8" y="10" width="8" height="6" rx="1" />
     <path d="M8 10l4 3 4-3M6 6h4M14 6h4M6 6l-3 2M18 6l3 2M7 19h10" />
   </svg>
 );
-const IconCloudUpload = (props) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconCloudUpload = ({ className = "h-5 w-5", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M7 18a4 4 0 1 1 1-7.9 5 5 0 0 1 9.7 1.4A3.5 3.5 0 1 1 18 18H7z" />
     <path d="M12 15V9M9.5 11.5L12 9l2.5 2.5" />
   </svg>
 );
-const IconEmail = (props) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconEmail = ({ className = "h-5 w-5", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect x="3" y="5" width="18" height="14" rx="2" />
     <path d="M3 7l9 6 9-6" />
   </svg>
 );
-const IconMapPin = (props) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+const IconMapPin = ({ className = "h-5 w-5", ...props }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M20 10a8 8 0 1 0-16 0c0 5 8 12 8 12s8-7 8-12z" />
     <circle cx="12" cy="10" r="2.5" />
   </svg>
 );
-// subtle mesh as a component (hero background)
-const HeroMesh = (props) => (
-  <svg viewBox="0 0 1200 400" preserveAspectRatio="none" {...props}>
+
+// Subtle hero mesh background component
+const HeroMesh = ({ className = "h-64 w-full", ...props }) => (
+  <svg className={className} viewBox="0 0 1200 400" preserveAspectRatio="none" {...props}>
     <defs>
       <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
         <stop offset="0" stopColor="#eef2ff" />
@@ -181,14 +180,13 @@ function Home({ t, lang }) {
       <section className="border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
-            <div className="mb-2 h-8 w-8">
-              <IconGlobeWire />
-            </div>
+            {/* ICON: now sized via Tailwind, placed above tagline */}
+            <IconGlobeWire className="h-10 w-10 text-indigo-600 mb-2" />
             <p className="text-xs uppercase tracking-[0.25em] text-indigo-700">{t.tagline}</p>
 
             {/* Headline:
                 - zh: two lines
-                - en: single line with “Shine Globally” kept together */}
+                - en: one line with “Shine Globally” kept together */}
             {lang === "zh" ? (
               <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
                 <span>{t.hero_line1}</span>
@@ -213,8 +211,7 @@ function Home({ t, lang }) {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white p-0 shadow-sm">
-            {/* Inline mesh background instead of image */}
-            <HeroMesh className="mb-0 h-64 w-full" />
+            <HeroMesh className="h-64 w-full" />
             <div className="grid grid-cols-2 gap-4 p-6 text-sm text-gray-700">
               <InfoCard label={t.kv.positioning_label} value={t.kv.positioning} />
               <InfoCard label={t.kv.mission_label} value={t.kv.mission} />
@@ -414,13 +411,10 @@ function InfoCard({ label, value }) {
 /* ------------------------------ i18n & helpers --------------------------- */
 const i18n = {
   zh: {
-    // nav
     nav_about: "关于我们",
     nav_services: "业务板块",
     nav_member: "会员上传",
     nav_contact: "联系我们",
-
-    // CTAs / hero (forced 2-line)
     contact_cta: "联系我们",
     primary_cta: "查看业务",
     secondary_cta: "了解我们",
@@ -428,8 +422,6 @@ const i18n = {
     hero_line1: "美销邦 MashBond —",
     hero_line2: "让亚洲在此发光",
     hero_sub: "使命：赋能 · 连接 · 增长 ｜ 核心理念：先赋能，共成长。",
-
-    // KV cards
     kv: {
       positioning_label: "定位",
       positioning: "S2B2C 跨境生态圈",
@@ -440,21 +432,15 @@ const i18n = {
       keywords_label: "关键词",
       keywords: "品牌 · 创作者 · 物流 · 媒体 · AI",
     },
-
-    // Value
     value_title: "核心价值（咨询为先）",
     value_cards: [
       { title: "咨询先行", desc: "以市场研究、品牌诊断与策略为起点，明确切入与渠道优先级。" },
       { title: "一站式落地", desc: "从本地化包装、营销投放到跨境物流与售后。" },
       { title: "数据驱动", desc: "用可量化指标与复盘机制持续优化投入产出。" },
     ],
-
-    // About
     about_title: "关于我们",
     about_blurb_1: "MashBond（美销邦）以“咨询为先”连接品牌、创作者、媒体与供应链，帮助亚洲品牌高效出海并实现长期增长。",
     about_blurb_2: "我们通过市场研究、渠道优先级与执行方法论，结合线下展示与跨境履约，确保策略落地与持续增长。",
-
-    // Services
     services_title: "业务板块",
     services_intro: "从诊断与策略到落地执行：为品牌提供市场进入、内容营销与跨境物流的一体化方案。",
     services_list: [
@@ -465,8 +451,6 @@ const i18n = {
       { title: "MASHLAB 营销案例", desc: "网红推广、UGC 方案与复盘数据。", icon: "analytics" },
       { title: "合作入口", desc: "提交意向表或 API 对接，快速启动合作。", icon: "api" },
     ],
-
-    // Contact
     contact_title: "联系 MashBond",
     contact_blurb: "留下您的需求，我们将为您制定跨境增长方案。",
     contact_email: "邮箱",
@@ -478,8 +462,6 @@ const i18n = {
     form_email_ph: "you@example.com",
     form_need_ph: "请告诉我们您的品牌与目标",
     form_submit: "提交",
-
-    // Member Upload
     member_title: "会员上传",
     member_blurb: "选择图片进行预览（演示版，不会保存到服务器）。后续可接入云存储或邮箱投递。",
     upload_select: "选择图片文件（可多选）",
@@ -490,23 +472,17 @@ const i18n = {
   },
 
   en: {
-    // nav
     nav_about: "About",
     nav_services: "Services",
     nav_member: "Member Upload",
     nav_contact: "Contact",
-
-    // CTAs / hero
     contact_cta: "Contact Us",
     primary_cta: "View Services",
     secondary_cta: "About Us",
     tagline: "Consulting First · S2B2C Cross-Border Ecosystem",
-    // EN headline rendered as one line:
     hero_inline_left: "MashBond — Let Asia ",
     hero_inline_right: "Shine Globally",
     hero_sub: "Mission: Empower · Connect · Grow | Core Principle: Enable first, grow together.",
-
-    // KV cards
     kv: {
       positioning_label: "Positioning",
       positioning: "S2B2C Cross-Border Ecosystem",
@@ -517,21 +493,15 @@ const i18n = {
       keywords_label: "Keywords",
       keywords: "Brand · Creators · Logistics · Media · AI",
     },
-
-    // Value
     value_title: "Our Core Value (Consulting First)",
     value_cards: [
       { title: "Consulting-led", desc: "Start with research, diagnosis, and strategy to define market entry and channel priorities." },
       { title: "End-to-end Execution", desc: "From localization and marketing to cross-border logistics and after-sales." },
       { title: "Data-Driven", desc: "Continuous optimization with measurable metrics and retrospectives." },
     ],
-
-    // About
     about_title: "Who We Are",
     about_blurb_1: "MashBond connects brands, creators, media and supply chain with a consulting-first approach to help Asian brands scale globally.",
     about_blurb_2: "We combine market research, channel prioritization and execution methodology with offline showrooming and cross-border fulfillment.",
-
-    // Services
     services_title: "What We Do",
     services_intro: "From diagnosis & strategy to execution: market entry, creator marketing and cross-border logistics in one plan.",
     services_list: [
@@ -542,8 +512,6 @@ const i18n = {
       { title: "MASHLAB Marketing", desc: "Influencer/UGC campaigns with measurable results.", icon: "analytics" },
       { title: "Cooperation Entry", desc: "Submit intent form or connect via API to start quickly.", icon: "api" },
     ],
-
-    // Contact
     contact_title: "Contact MashBond",
     contact_blurb: "Tell us your needs and we will propose a cross-border growth plan.",
     contact_email: "Email",
@@ -555,8 +523,6 @@ const i18n = {
     form_email_ph: "you@example.com",
     form_need_ph: "Tell us about your brand & goals",
     form_submit: "Send",
-
-    // Member Upload
     member_title: "Member Upload",
     member_blurb: "Select images to preview. This demo does not store files yet. We can connect cloud storage or email submission next.",
     upload_select: "Choose image files (multi-select)",
