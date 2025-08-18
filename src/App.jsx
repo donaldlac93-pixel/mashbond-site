@@ -9,9 +9,85 @@ import React, { useEffect, useState } from "react";
  * - Hero:
  *     - ZH: forced two-line (line 2 is always “让亚洲在此发光”)
  *     - EN: single line, "Shine Globally" kept together on the same line
- * - Images optional; if /public/images/hero.jpg doesn’t exist, it hides gracefully
+ * - Icons: embedded SVG React components (no extra files required)
  */
 
+/* ------------------------------- ICONS ---------------------------------- */
+// 24x24 line icons (indigo) — techy style
+const stroke = "#4f46e5";
+const sw = 1.5;
+const IconGlobeWire = (props) => (
+  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3a16 16 0 0 1 0 18M12 3a16 16 0 0 0 0 18" />
+    <path d="M7.8 7.8l2.4 2.4m3.6 3.6l2.4 2.4M16.2 7.8 13.8 10.2M7.8 16.2 10.2 13.8" />
+  </svg>
+);
+const IconChipAI = (props) => (
+  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="6" y="6" width="12" height="12" rx="2" />
+    <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+    <path d="M9 14.5V9.5h1.8l.7 1.8.7-1.8H14v5h-1.2v-2l-.5 1.3h-.7L11 12.5v2z" />
+  </svg>
+);
+const IconAPIPlug = (props) => (
+  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="3" y="7" width="10" height="10" rx="2" />
+    <path d="M13 12h8M19 9v6" />
+  </svg>
+);
+const IconAnalyticsLine = (props) => (
+  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M3 20h18" />
+    <path d="M5 16l4-5 4 3 6-7" />
+    <circle cx="9" cy="11" r="1" />
+    <circle cx="13" cy="14" r="1" />
+    <circle cx="19" cy="7" r="1" />
+  </svg>
+);
+const IconDroneBox = (props) => (
+  <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="8" y="10" width="8" height="6" rx="1" />
+    <path d="M8 10l4 3 4-3M6 6h4M14 6h4M6 6l-3 2M18 6l3 2M7 19h10" />
+  </svg>
+);
+const IconCloudUpload = (props) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M7 18a4 4 0 1 1 1-7.9 5 5 0 0 1 9.7 1.4A3.5 3.5 0 1 1 18 18H7z" />
+    <path d="M12 15V9M9.5 11.5L12 9l2.5 2.5" />
+  </svg>
+);
+const IconEmail = (props) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="M3 7l9 6 9-6" />
+  </svg>
+);
+const IconMapPin = (props) => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M20 10a8 8 0 1 0-16 0c0 5 8 12 8 12s8-7 8-12z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </svg>
+);
+// subtle mesh as a component (hero background)
+const HeroMesh = (props) => (
+  <svg viewBox="0 0 1200 400" preserveAspectRatio="none" {...props}>
+    <defs>
+      <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stopColor="#eef2ff" />
+        <stop offset="1" stopColor="#ffffff" />
+      </linearGradient>
+      <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+        <circle cx="1.5" cy="1.5" r="1.5" fill="#e0e7ff" />
+      </pattern>
+    </defs>
+    <rect width="1200" height="400" fill="url(#g)" />
+    <rect width="1200" height="400" fill="url(#dots)" opacity=".6" />
+    <path d="M0,260 C300,220 380,320 620,300 C860,280 950,210 1200,250 L1200,400 L0,400 Z" fill="#e0e7ff" opacity=".55" />
+  </svg>
+);
+
+/* ------------------------------- APP ------------------------------------ */
 export default function App() {
   return <Router />;
 }
@@ -105,6 +181,9 @@ function Home({ t, lang }) {
       <section className="border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
+            <div className="mb-2 h-8 w-8">
+              <IconGlobeWire />
+            </div>
             <p className="text-xs uppercase tracking-[0.25em] text-indigo-700">{t.tagline}</p>
 
             {/* Headline:
@@ -133,20 +212,15 @@ function Home({ t, lang }) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
-            {/* Optional hero image; hidden if missing */}
-            <img
-              src="/images/hero.jpg"
-              alt=""
-              onError={(e) => (e.currentTarget.style.display = "none")}
-              className="mb-4 w-full rounded-xl object-cover"
-            />
-            <ul className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+          <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white p-0 shadow-sm">
+            {/* Inline mesh background instead of image */}
+            <HeroMesh className="mb-0 h-64 w-full" />
+            <div className="grid grid-cols-2 gap-4 p-6 text-sm text-gray-700">
               <InfoCard label={t.kv.positioning_label} value={t.kv.positioning} />
               <InfoCard label={t.kv.mission_label} value={t.kv.mission} />
               <InfoCard label={t.kv.vision_label} value={t.kv.vision} />
               <InfoCard label={t.kv.keywords_label} value={t.kv.keywords} />
-            </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -174,11 +248,22 @@ function About({ t }) {
 }
 
 function Services({ t }) {
+  // map short icon keys -> components
+  const iconMap = {
+    chip: <IconChipAI className="mb-3 h-10 w-10" />,
+    api: <IconAPIPlug className="mb-3 h-10 w-10" />,
+    drone: <IconDroneBox className="mb-3 h-10 w-10" />,
+    analytics: <IconAnalyticsLine className="mb-3 h-10 w-10" />,
+    globe: <IconGlobeWire className="mb-3 h-10 w-10" />,
+  };
+
   return (
     <PageShell title={t.services_title} padded>
       <p className="max-w-4xl text-gray-700">{t.services_intro}</p>
       <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {t.services_list.map((s) => <Card key={s.title} title={s.title} desc={s.desc} />)}
+        {t.services_list.map((s) => (
+          <Card key={s.title} title={s.title} desc={s.desc} icon={iconMap[s.icon]} />
+        ))}
       </div>
     </PageShell>
   );
@@ -215,7 +300,10 @@ function MemberUpload({ t }) {
       <p className="mt-4 max-w-3xl text-gray-700">{t.member_blurb}</p>
 
       <div className="mt-8 rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
-        <label className="block text-sm font-medium text-gray-700">{t.upload_select}</label>
+        <div className="flex items-center gap-2">
+          <IconCloudUpload />
+          <label className="text-sm font-medium text-gray-700">{t.upload_select}</label>
+        </div>
         <input
           id="member-files"
           type="file"
@@ -267,9 +355,13 @@ function Contact({ t }) {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{t.contact_title}</h2>
           <p className="mt-4 text-gray-700">{t.contact_blurb}</p>
-          <ul className="mt-6 space-y-2 text-sm text-gray-700">
-            <li>{t.contact_email}: hello@mashbond.com</li>
-            <li>{t.contact_address}: Los Angeles · USA</li>
+          <ul className="mt-6 space-y-3 text-sm text-gray-700">
+            <li className="flex items-center gap-2">
+              <IconEmail /> {t.contact_email}: hello@mashbond.com
+            </li>
+            <li className="flex items-center gap-2">
+              <IconMapPin /> {t.contact_address}: Los Angeles · USA
+            </li>
           </ul>
         </div>
         <form className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
@@ -300,9 +392,10 @@ function PageShell({ title, children, bg, padded }) {
   );
 }
 
-function Card({ title, desc }) {
+function Card({ title, desc, icon }) {
   return (
     <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+      {icon || null}
       <h3 className="font-semibold text-gray-900">{title}</h3>
       <p className="mt-2 text-gray-700">{desc}</p>
     </div>
@@ -365,12 +458,12 @@ const i18n = {
     services_title: "业务板块",
     services_intro: "从诊断与策略到落地执行：为品牌提供市场进入、内容营销与跨境物流的一体化方案。",
     services_list: [
-      { title: "顾问对接", desc: "品牌诊断、市场进入与渠道优先级规划。" },
-      { title: "LA 展示厅租赁", desc: "线下场景展示与商务接待，提高转化。" },
-      { title: "物流与海外仓", desc: "美国/加拿大/墨西哥多仓，退换修与尾程派送。" },
-      { title: "BBS 供销平台", desc: "批发与一件代发，分销邀请码与社交裂变。" },
-      { title: "MASHLAB 营销案例", desc: "网红推广、UGC 方案与复盘数据。" },
-      { title: "合作入口", desc: "提交意向表或 API 对接，快速启动合作。" },
+      { title: "顾问对接", desc: "品牌诊断、市场进入与渠道优先级规划。", icon: "chip" },
+      { title: "LA 展示厅租赁", desc: "线下场景展示与商务接待，提高转化。", icon: "api" },
+      { title: "物流与海外仓", desc: "美国/加拿大/墨西哥多仓，退换修与尾程派送。", icon: "drone" },
+      { title: "BBS 供销平台", desc: "批发与一件代发，分销邀请码与社交裂变。", icon: "analytics" },
+      { title: "MASHLAB 营销案例", desc: "网红推广、UGC 方案与复盘数据。", icon: "analytics" },
+      { title: "合作入口", desc: "提交意向表或 API 对接，快速启动合作。", icon: "api" },
     ],
 
     // Contact
@@ -442,12 +535,12 @@ const i18n = {
     services_title: "What We Do",
     services_intro: "From diagnosis & strategy to execution: market entry, creator marketing and cross-border logistics in one plan.",
     services_list: [
-      { title: "Consulting Desk", desc: "Brand diagnosis, entry strategy and channel prioritization." },
-      { title: "LA Showroom Rental", desc: "Physical showcase & meetings to boost conversion." },
-      { title: "Logistics & Overseas Warehouses", desc: "US/CA/MX multi-warehouse, reverse logistics & last-mile." },
-      { title: "B2B/BBS Supply Platform", desc: "Wholesale & dropship with referral/invite mechanics." },
-      { title: "MASHLAB Marketing", desc: "Influencer/UGC campaigns with measurable results." },
-      { title: "Cooperation Entry", desc: "Submit intent form or connect via API to start quickly." },
+      { title: "Consulting Desk", desc: "Brand diagnosis, entry strategy and channel prioritization.", icon: "chip" },
+      { title: "LA Showroom Rental", desc: "Physical showcase & meetings to boost conversion.", icon: "api" },
+      { title: "Logistics & Overseas Warehouses", desc: "US/CA/MX multi-warehouse, reverse logistics & last-mile.", icon: "drone" },
+      { title: "B2B/BBS Supply Platform", desc: "Wholesale & dropship with referral/invite mechanics.", icon: "analytics" },
+      { title: "MASHLAB Marketing", desc: "Influencer/UGC campaigns with measurable results.", icon: "analytics" },
+      { title: "Cooperation Entry", desc: "Submit intent form or connect via API to start quickly.", icon: "api" },
     ],
 
     // Contact
