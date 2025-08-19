@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 
 /**
  * MashBond — App.jsx
- * - Centered masthead: logo centered, categories under logo (minimal)
+ * - Centered masthead: logo centered (clickable → Home), categories under logo
  * - Top-right: Language toggle + Contact button
  * - Masthead fades/hides on scroll
- * - Logo path: /public/logo.png  (exact casing)
+ * - Bigger logo cap: 140px (adjust in Header style if needed)
+ * - Logo path: /public/logo.png
  */
 
 export default function App() {
@@ -49,14 +50,13 @@ function getRoute() {
 }
 
 /* --------------------------------- Header -------------------------------- */
-/* Fixed masthead that fades away after a small scroll */
 function Header({ t, lang, setLang }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      setHidden(y > 80); // hide when scrolled a bit; tweak threshold if you want
+      setHidden(y > 80); // hide when scrolled a bit; tweak threshold if desired
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -92,18 +92,20 @@ function Header({ t, lang, setLang }) {
         ].join(" ")}
       >
         <div className="pt-2 pb-4 text-center">
-          {/* Logo centered — natural size, just capped for consistency */}
-          <img
-            src="/logo.png"
-            alt="MashBond Logo"
-            className="mx-auto object-contain"
-            style={{ maxHeight: "96px" }} // adjust to taste; keeps visual like your screenshot
-            loading="eager"
-            decoding="async"
-          />
+          {/* Logo is now a link to Home; larger visual cap */}
+          <a href="#/">
+            <img
+              src="/logo.png"
+              alt="MashBond Logo"
+              className="mx-auto object-contain hover:opacity-90 transition"
+              style={{ maxHeight: "140px" }} // ← increase/decrease here
+              loading="eager"
+              decoding="async"
+            />
+          </a>
 
           {/* Minimal categories below logo */}
-          <nav className="mt-3 flex items-center justify-center gap-6 text-sm text-gray-700">
+          <nav className="mt-4 flex items-center justify-center gap-6 text-sm text-gray-700">
             <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
             <span className="text-gray-300">·</span>
             <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
@@ -120,8 +122,8 @@ function Header({ t, lang, setLang }) {
 
 /* Reserve space so content doesn't slide under the fixed header */
 function HeaderSpacer() {
-  // tweak heights to match your masthead height (depends on logo cap)
-  return <div className="h-[140px] md:h-[156px]" />;
+  // tweak heights to match masthead height (depends on logo cap above)
+  return <div className="h-[200px] md:h-[220px]" />;
 }
 
 /* --------------------------------- Footer -------------------------------- */
