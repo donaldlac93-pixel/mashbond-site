@@ -133,7 +133,7 @@ function Header({ t, lang, setLang }) {
 
 /* Reserve space so content doesn't slide under the fixed header */
 function HeaderSpacer() {
-  return <div className="h-[200px] md:h-[220px]" />;
+  return <div className="h-[160px] md:h-[180px]" />;
 }
 
 /* --------------------------------- Footer -------------------------------- */
