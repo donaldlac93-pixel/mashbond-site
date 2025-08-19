@@ -193,8 +193,7 @@ function MemberUpload({ t }) {
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
 
-  function onSelect(e) {
-    function onSelect(e) {
+ function onSelect(e) {
   const input = e.currentTarget || e.target;
   const list = input && input.files ? input.files : [];
   const fs = Array.from(list);
@@ -211,7 +210,6 @@ function MemberUpload({ t }) {
 
   Promise.all(readers).then(setPreviews);
 }
-
 
   function clearAll() {
     setFiles([]);
@@ -363,6 +361,7 @@ function InfoCard({ label, value }) {
   );
 }
 
+/* ------------------------------ i18n & helpers --------------------------- */
 /* ------------------------------ i18n & helpers --------------------------- */
 const i18n = {
   zh: {
