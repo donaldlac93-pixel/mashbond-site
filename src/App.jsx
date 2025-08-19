@@ -194,18 +194,24 @@ function MemberUpload({ t }) {
   const [previews, setPreviews] = useState([]);
 
   function onSelect(e) {
-    const fs = Array.from((e.target.files || []) as FileList);
-    setFiles(fs);
-    const readers = fs.map(
-      (f) =>
-        new Promise((res) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => res({ name: f.name, src: ev.target.result });
-          reader.readAsDataURL(f);
-        })
-    );
-    Promise.all(readers).then(setPreviews);
-  }
+    function onSelect(e) {
+  const input = e.currentTarget || e.target;
+  const list = input && input.files ? input.files : [];
+  const fs = Array.from(list);
+
+  setFiles(fs);
+
+  const readers = fs.map((f) =>
+    new Promise((res) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => res({ name: f.name, src: ev.target.result });
+      reader.readAsDataURL(f);
+    })
+  );
+
+  Promise.all(readers).then(setPreviews);
+}
+
 
   function clearAll() {
     setFiles([]);
