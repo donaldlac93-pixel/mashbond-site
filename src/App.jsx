@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 
 /**
  * MashBond — App.jsx
- * - Pages: Home, About, Services, Member Upload, Contact
- * - Router: hash-based (#/about, #/services, #/member-upload, #/contact)
- * - Theme: light (white + indigo)
- * - Logo path: /public/logo.png  ← ensure this file exists with exact casing
+ * - Centered masthead: logo centered, categories under logo (minimal)
+ * - Top-right: Language toggle + Contact button
+ * - Masthead fades/hides on scroll
+ * - Logo path: /public/logo.png  (exact casing)
  */
 
 export default function App() {
@@ -27,6 +27,7 @@ function Router() {
   return (
     <div className="min-h-screen bg-white text-gray-800">
       <Header t={t} lang={lang} setLang={setLang} />
+      <HeaderSpacer />
       {route === "home" && <Home t={t} />}
       {route === "about" && <About t={t} />}
       {route === "services" && <Services t={t} />}
@@ -48,50 +49,79 @@ function getRoute() {
 }
 
 /* --------------------------------- Header -------------------------------- */
+/* Fixed masthead that fades away after a small scroll */
 function Header({ t, lang, setLang }) {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY || 0;
+      setHidden(y > 80); // hide when scrolled a bit; tweak threshold if you want
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        {/* Logo + Brand */}
-        <a href="#/" className="flex items-center gap-3 shrink-0">
-          <img
-            src="/logo.png"
-            alt="MashBond Logo"
-            loading="eager"
-            decoding="async"
-            className="object-contain" /* natural size (no forced h/w) */
-          />
-          <span className="text-lg font-bold tracking-wide text-gray-900 md:text-xl">
-            MashBond
-          </span>
-        </a>
-
-        {/* Navigation */}
-        <nav className="hidden items-center gap-6 text-sm md:flex">
-          <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
-          <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
-          <a href="#/member-upload" className="hover:text-indigo-700">{t.nav_member}</a>
-          <a href="#/contact" className="hover:text-indigo-700">{t.nav_contact}</a>
-        </nav>
-
-        {/* Lang toggle + CTA */}
-        <div className="flex items-center gap-3">
+    <header className="fixed inset-x-0 top-0 z-30">
+      {/* Utility bar (top-right actions) */}
+      <div className="mx-auto max-w-6xl px-4 pt-3">
+        <div className="flex justify-end gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
-            className="rounded-xl border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+            className="pointer-events-auto rounded-xl border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
           >
             {lang === "zh" ? "English" : "简体中文"}
           </button>
           <a
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="pointer-events-auto rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
             href="#/contact"
           >
             {t.contact_cta}
           </a>
         </div>
       </div>
+
+      {/* Centered masthead */}
+      <div
+        className={[
+          "transition-all duration-300 ease-out",
+          "mx-auto max-w-6xl px-4",
+          hidden ? "opacity-0 -translate-y-3 pointer-events-none" : "opacity-100 translate-y-0"
+        ].join(" ")}
+      >
+        <div className="pt-2 pb-4 text-center">
+          {/* Logo centered — natural size, just capped for consistency */}
+          <img
+            src="/logo.png"
+            alt="MashBond Logo"
+            className="mx-auto object-contain"
+            style={{ maxHeight: "96px" }} // adjust to taste; keeps visual like your screenshot
+            loading="eager"
+            decoding="async"
+          />
+
+          {/* Minimal categories below logo */}
+          <nav className="mt-3 flex items-center justify-center gap-6 text-sm text-gray-700">
+            <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
+            <span className="text-gray-300">·</span>
+            <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
+            <span className="text-gray-300">·</span>
+            <a href="#/member-upload" className="hover:text-indigo-700">{t.nav_member}</a>
+            <span className="text-gray-300">·</span>
+            <a href="#/contact" className="hover:text-indigo-700">{t.nav_contact}</a>
+          </nav>
+        </div>
+      </div>
     </header>
   );
+}
+
+/* Reserve space so content doesn't slide under the fixed header */
+function HeaderSpacer() {
+  // tweak heights to match your masthead height (depends on logo cap)
+  return <div className="h-[140px] md:h-[156px]" />;
 }
 
 /* --------------------------------- Footer -------------------------------- */
@@ -195,7 +225,7 @@ function MemberUpload({ t }) {
   function onSelect(e) {
     const input = e.currentTarget || e.target;
     const list = input && input.files ? input.files : [];
-    const fs = Array.from(list); // works on FileList without TypeScript casts
+    const fs = Array.from(list);
     setFiles(fs);
 
     const readers = fs.map(
