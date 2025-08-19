@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 /**
  * MashBond — Multi-page (hash) site with bilingual toggle (EN ⇄ ZH)
  * - Pages: Home, About, Services, Member Upload, Contact
- * - Simple hash router: #/about, #/services, #/member-upload, #/contact
+ * - Router: #/about, #/services, #/member-upload, #/contact
  * - Light theme; two-color (white + indigo)
- * - LOGO: uses /public/android-chrome-512x512.png (change path if you prefer)
+ * - Header logo: /public/android-chrome-192x192.png (adjust path if needed)
  */
 
 export default function App() {
@@ -32,7 +32,7 @@ function Router() {
       {route === "services" && <Services t={t} />}
       {route === "member-upload" && <MemberUpload t={t} />}
       {route === "contact" && <Contact t={t} />}
-      {!["home","about","services","member-upload","contact"].includes(route) && (
+      {!["home", "about", "services", "member-upload", "contact"].includes(route) && (
         <PageShell title="404">
           <p className="mt-4 text-gray-700">Page not found.</p>
         </PageShell>
@@ -53,15 +53,15 @@ function Header({ t, lang, setLang }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         {/* Brand (logo + name) */}
         <a href="#/" className="flex items-center gap-3 shrink-0">
-          {/* IMPORTANT: This path is to /public/android-chrome-512x512.png */}
+          {/* Use 192 or 512 file; both live in /public */}
           <img
-            src="/android-chrome-512x512.png"
+            src="/android-chrome-192x192.png"
             alt="MashBond logo"
-            className="h-8 w-auto"
+            className="h-10 w-10 md:h-12 md:w-12 object-contain"
             loading="eager"
             decoding="async"
           />
-          <span className="text-base font-semibold tracking-wide text-gray-900">
+          <span className="text-xl font-bold tracking-wide text-gray-900">
             MashBond
           </span>
         </a>
