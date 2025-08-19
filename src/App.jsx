@@ -68,7 +68,7 @@ function Header({ t, lang, setLang }) {
   return (
     <header className="fixed inset-x-0 top-0 z-30 bg-white/95 backdrop-blur">
       {/* Utility bar (top-right actions) */}
-      <div className="mx-auto max-w-6xl px-4 pt-3">
+      <div className="mx-auto max-w-6xl px-4 pt-1">
         <div className="flex justify-end gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
