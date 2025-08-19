@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 
 /**
  * MashBond — Multi-page (hash) site with bilingual toggle (EN ⇄ ZH)
- * - Pages: Home, About, Services, Member Upload, Contact
- * - Router: #/about, #/services, #/member-upload, #/contact
- * - Light theme; two-color (white + indigo)
- * - Header logo: /public/android-chrome-192x192.png (adjust path if needed)
+ * Pages: Home, About, Services, Member Upload, Contact
+ * Router: #/about, #/services, #/member-upload, #/contact
+ * Light theme; two-color (white + indigo)
+ * Header logo: /public/logo.png
  */
 
 export default function App() {
@@ -51,19 +51,17 @@ function Header({ t, lang, setLang }) {
   return (
     <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+
         {/* Brand (logo + name) */}
         <a href="#/" className="flex items-center gap-3 shrink-0">
-          {/* Use 192 or 512 file; both live in /public */}
           <img
-            src="/android-chrome-192x192.png"
+            src="/logo.png"            // <-- your renamed file in public/
             alt="MashBond logo"
-            className="h-10 w-10 md:h-12 md:w-12 object-contain"
+            className="h-12 w-12 md:h-14 md:w-14 object-contain"
             loading="eager"
             decoding="async"
           />
-          <span className="text-xl font-bold tracking-wide text-gray-900">
-            MashBond
-          </span>
+          <span className="text-xl font-bold tracking-wide text-gray-900">MashBond</span>
         </a>
 
         {/* Nav */}
@@ -98,9 +96,7 @@ function Footer({ t }) {
   return (
     <footer className="border-t border-gray-100 bg-white">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 md:flex-row">
-        <p className="text-sm text-gray-500">
-          © {new Date().getFullYear()} MashBond. All rights reserved.
-        </p>
+        <p className="text-sm text-gray-500">© {new Date().getFullYear()} MashBond. All rights reserved.</p>
         <div className="flex items-center gap-4 text-sm">
           <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
           <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
@@ -121,13 +117,10 @@ function Home({ t }) {
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-indigo-700">{t.tagline}</p>
-
-            {/* Two-line heading */}
             <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
               <span>{t.hero_line1}</span>
               <span className="block">{t.hero_line2}</span>
             </h1>
-
             <p className="mt-5 max-w-xl text-gray-600">{t.hero_sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a className="rounded-xl bg-indigo-600 px-5 py-3 text-white" href="#/services">
