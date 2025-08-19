@@ -93,7 +93,7 @@ function Header({ t, lang, setLang }) {
           hidden ? "opacity-0 -translate-y-3 pointer-events-none" : "opacity-100 translate-y-0"
         ].join(" ")}
       >
-        <div className="pt-2 text-center">
+        <div className="pt-0 text-center">
           {/* Logo → Home; larger cap */}
           <a href="#/">
             <img
