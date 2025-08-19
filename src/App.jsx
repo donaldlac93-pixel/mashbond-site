@@ -5,7 +5,9 @@ import React, { useEffect, useState } from "react";
  * - Centered masthead: logo centered (clickable → Home), categories under logo
  * - Top-right: Language toggle + Contact button
  * - Masthead fades/hides on scroll
- * - Bigger logo cap: 140px (adjust in Header style if needed)
+ * - Nav sits ABOVE a subtle divider line
+ * - Small inline SVG icons (no extra dependencies)
+ * - Logo cap: 140px (adjust in Header style if needed)
  * - Logo path: /public/logo.png
  */
 
@@ -56,7 +58,7 @@ function Header({ t, lang, setLang }) {
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      setHidden(y > 80); // hide when scrolled a bit; tweak threshold if desired
+      setHidden(y > 80);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -64,7 +66,7 @@ function Header({ t, lang, setLang }) {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30">
+    <header className="fixed inset-x-0 top-0 z-30 bg-white/95 backdrop-blur">
       {/* Utility bar (top-right actions) */}
       <div className="mx-auto max-w-6xl px-4 pt-3">
         <div className="flex justify-end gap-3">
@@ -91,29 +93,38 @@ function Header({ t, lang, setLang }) {
           hidden ? "opacity-0 -translate-y-3 pointer-events-none" : "opacity-100 translate-y-0"
         ].join(" ")}
       >
-        <div className="pt-2 pb-4 text-center">
-          {/* Logo is now a link to Home; larger visual cap */}
+        <div className="pt-2 text-center">
+          {/* Logo → Home; larger cap */}
           <a href="#/">
             <img
               src="/logo.png"
               alt="MashBond Logo"
               className="mx-auto object-contain hover:opacity-90 transition"
-              style={{ maxHeight: "140px" }} // ← increase/decrease here
+              style={{ maxHeight: "140px" }}
               loading="eager"
               decoding="async"
             />
           </a>
 
-          {/* Minimal categories below logo */}
-          <nav className="mt-4 flex items-center justify-center gap-6 text-sm text-gray-700">
-            <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
-            <span className="text-gray-300">·</span>
-            <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
-            <span className="text-gray-300">·</span>
-            <a href="#/member-upload" className="hover:text-indigo-700">{t.nav_member}</a>
-            <span className="text-gray-300">·</span>
-            <a href="#/contact" className="hover:text-indigo-700">{t.nav_contact}</a>
+          {/* NAV ABOVE the line */}
+          <nav className="mt-3 flex items-center justify-center gap-8 text-sm font-medium text-gray-700">
+            <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
+              <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
+            </a>
+            <a href="#/services" className="flex items-center gap-2 hover:text-indigo-700">
+              <IconBriefcase className="w-4 h-4 text-indigo-600" /> {t.nav_services}
+            </a>
+            <a href="#/member-upload" className="flex items-center gap-2 hover:text-indigo-700">
+              <IconUpload className="w-4 h-4 text-indigo-600" /> {t.nav_member}
+            </a>
+            <a href="#/contact" className="flex items-center gap-2 hover:text-indigo-700">
+              <IconMail className="w-4 h-4 text-indigo-600" /> {t.nav_contact}
+            </a>
           </nav>
+
+          {/* Divider line BELOW the nav */}
+          <div className="mt-3 h-px bg-gray-100" />
+          <div className="pb-3" />
         </div>
       </div>
     </header>
@@ -122,7 +133,6 @@ function Header({ t, lang, setLang }) {
 
 /* Reserve space so content doesn't slide under the fixed header */
 function HeaderSpacer() {
-  // tweak heights to match masthead height (depends on logo cap above)
   return <div className="h-[200px] md:h-[220px]" />;
 }
 
@@ -147,6 +157,8 @@ function Footer({ t }) {
 
 /* --------------------------------- Pages -------------------------------- */
 function Home({ t }) {
+  // Icons for value cards to add visual interest
+  const valueIcons = [IconTarget, IconRocket, IconChart];
   return (
     <>
       {/* Hero */}
@@ -185,11 +197,14 @@ function Home({ t }) {
 
       {/* Value */}
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{t.value_title}</h2>
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
+          <IconStar className="w-6 h-6 text-indigo-600" /> {t.value_title}
+        </h2>
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {t.value_cards.map((c) => (
-            <Card key={c.title} title={c.title} desc={c.desc} />
-          ))}
+          {t.value_cards.map((c, idx) => {
+            const Icon = valueIcons[idx % valueIcons.length];
+            return <Card key={c.title} title={c.title} desc={c.desc} Icon={Icon} />;
+          })}
         </div>
       </section>
     </>
@@ -198,7 +213,13 @@ function Home({ t }) {
 
 function About({ t }) {
   return (
-    <PageShell title={t.about_title}>
+    <PageShell
+      title={
+        <span className="flex items-center gap-2">
+          <IconInfo className="w-6 h-6 text-indigo-600" /> {t.about_title}
+        </span>
+      }
+    >
       <div className="mt-4 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
         <p className="text-gray-700">{t.about_blurb_1}</p>
         <p className="text-gray-700">{t.about_blurb_2}</p>
@@ -208,13 +229,29 @@ function About({ t }) {
 }
 
 function Services({ t }) {
+  const serviceIcons = [
+    IconBriefcase,
+    IconBuilding,
+    IconTruck,
+    IconBoxes,
+    IconMegaphone,
+    IconLink,
+  ];
   return (
-    <PageShell title={t.services_title} padded>
+    <PageShell
+      title={
+        <span className="flex items-center gap-2">
+          <IconBriefcase className="w-6 h-6 text-indigo-600" /> {t.services_title}
+        </span>
+      }
+      padded
+    >
       <p className="max-w-4xl text-gray-700">{t.services_intro}</p>
       <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {t.services_list.map((s) => (
-          <Card key={s.title} title={s.title} desc={s.desc} />
-        ))}
+        {t.services_list.map((s, idx) => {
+          const Icon = serviceIcons[idx % serviceIcons.length];
+          return <Card key={s.title} title={s.title} desc={s.desc} Icon={Icon} />;
+        })}
       </div>
     </PageShell>
   );
@@ -250,8 +287,8 @@ function MemberUpload({ t }) {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-16">
-      <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-        {t.member_title}
+      <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
+        <IconUpload className="w-6 h-6 text-indigo-600" /> {t.member_title}
       </h2>
       <p className="mt-4 max-w-3xl text-gray-700">{t.member_blurb}</p>
 
@@ -317,8 +354,8 @@ function Contact({ t }) {
     <section className="mx-auto max-w-6xl px-4 py-16">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-            {t.contact_title}
+          <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
+            <IconMail className="w-6 h-6 text-indigo-600" /> {t.contact_title}
           </h2>
           <p className="mt-4 text-gray-700">{t.contact_blurb}</p>
           <ul className="mt-6 space-y-2 text-sm text-gray-700">
@@ -373,10 +410,13 @@ function PageShell({ title, children, bg, padded }) {
   );
 }
 
-function Card({ title, desc }) {
+function Card({ title, desc, Icon }) {
   return (
     <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
-      <h3 className="font-semibold text-gray-900">{title}</h3>
+      <div className="flex items-center gap-2">
+        {Icon ? <Icon className="w-5 h-5 text-indigo-600" /> : null}
+        <h3 className="font-semibold text-gray-900">{title}</h3>
+      </div>
       <p className="mt-2 text-gray-700">{desc}</p>
     </div>
   );
@@ -388,6 +428,125 @@ function InfoCard({ label, value }) {
       <p className="text-xs text-indigo-700">{label}</p>
       <p className="mt-1 font-medium">{value}</p>
     </li>
+  );
+}
+
+/* ------------------------------ Tiny SVG Icons --------------------------- */
+/* (inline to avoid extra dependencies) */
+function IconInfo({ className = "w-4 h-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  );
+}
+function IconBriefcase({ className = "w-4 h-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <path d="M2 13h20" />
+    </svg>
+  );
+}
+function IconUpload({ className = "w-4 h-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 5 17 10" />
+      <line x1="12" y1="5" x2="12" y2="15" />
+    </svg>
+  );
+}
+function IconMail({ className = "w-4 h-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16v16H4z" />
+      <path d="m22 6-10 7L2 6" />
+    </svg>
+  );
+}
+function IconStar({ className = "w-6 h-6" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="m12 2 3.09 6.26L22 9.27l-5 4.88L18.18 22 12 18.77 5.82 22 7 14.15l-5-4.88 6.91-1.01L12 2z" />
+    </svg>
+  );
+}
+function IconTarget({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="12" r="3" />
+      <line x1="12" y1="2" x2="12" y2="4" />
+      <line x1="12" y1="20" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="4" y2="12" />
+      <line x1="20" y1="12" x2="22" y2="12" />
+    </svg>
+  );
+}
+function IconRocket({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 13l4 4" />
+      <path d="M6 6h3l7 7 2-2a7 7 0 0 0-9.9-9.9l-2 2z" />
+      <path d="M4 14l-1 5 5-1 9-9" />
+      <circle cx="15" cy="9" r="1" />
+    </svg>
+  );
+}
+function IconChart({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="12" width="4" height="8" />
+      <rect x="10" y="8" width="4" height="12" />
+      <rect x="17" y="4" width="4" height="16" />
+    </svg>
+  );
+}
+function IconBuilding({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+    </svg>
+  );
+}
+function IconTruck({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="15" height="13" />
+      <path d="M16 8h4l3 3v5h-7z" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="18.5" cy="18.5" r="2.5" />
+    </svg>
+  );
+}
+function IconBoxes({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7l9-4 9 4-9 4-9-4z" />
+      <path d="M3 17l9 4 9-4" />
+      <path d="M3 12l9 4 9-4" />
+    </svg>
+  );
+}
+function IconMegaphone({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 11v2a1 1 0 0 0 1 1h2l5 5V5L6 10H4a1 1 0 0 0-1 1z" />
+      <path d="M14 7a4 4 0 0 1 0 10" />
+    </svg>
+  );
+}
+function IconLink({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1" />
+      <path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 1 1-7-7l1-1" />
+    </svg>
   );
 }
 
