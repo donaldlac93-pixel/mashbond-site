@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /**
- * MashBond — App.jsx (animated dropdown + click fixes + services subpages)
- * - Animated Services dropdown (fade+scale), closes on leave/click/outside/route-change
- * - Top-right Lang/Contact buttons are clickable (z-50)
+ * MashBond — App.jsx
+ * - Stable slugs for services (no mixed/duplicated items when switching languages)
+ * - Animated Services dropdown with hover-intent (no flicker)
+ * - Dropdown closes on leave/click/outside/route-change
+ * - Top-right Lang/Contact buttons clickable (z-50)
  * - Each Services item is a subpage: #/services/<slug>
- * - #/services shows all cards; subroutes show one service page with details
- * - Logo centered; minimal masthead
+ * - #/services shows all cards; subroutes show one service page
  * - i18n-ready (EN/简体中文)
  * - Logo path: /public/logo.png
  */
@@ -15,7 +16,17 @@ export default function App() {
   return <Router />;
 }
 
-/* ---------------------------- Router & Layout ---------------------------- */
+/* ---------- Stable keys for service routes (order matters across languages) ---------- */
+const SERVICE_KEYS = [
+  "consulting-desk",
+  "la-showroom-rental",
+  "logistics-overseas-warehouses",
+  "b2b-bbs-supply-platform",
+  "mashlab-marketing",
+  "cooperation-entry",
+];
+
+/* -------------------------------- Router & Layout ------------------------------- */
 function Router() {
   const [route, setRoute] = useState(getRoute());
   const [lang, setLang] = useState("en");
@@ -54,13 +65,13 @@ function getRoute() {
   return path || "home";
 }
 
-/* --------------------------------- Header -------------------------------- */
+/* ------------------------------------ Header ------------------------------------ */
 function Header({ t, lang, setLang }) {
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const hoverTimer = useRef(null);
 
-  // shrink/hide masthead on scroll
   useEffect(() => {
     const onScroll = () => setHidden((window.scrollY || 0) > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -68,7 +79,6 @@ function Header({ t, lang, setLang }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // close dropdown on outside click and on route change
   useEffect(() => {
     const onDocClick = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
@@ -82,21 +92,28 @@ function Header({ t, lang, setLang }) {
     };
   }, []);
 
-  // Build dropdown items (title → slug)
-  const serviceLinks = useMemo(
-    () =>
-      (t.services_list || []).map((s) => ({
-        title: s.title,
-        slug: slugify(s.title),
-        href: `#/services/${slugify(s.title)}`,
-      })),
-    [t.services_list]
-  );
+  // Build dropdown strictly from current language + stable keys
+  const serviceLinks = useMemo(() => {
+    const list = t.services_list || [];
+    return SERVICE_KEYS.map((slug, i) => {
+      const item = list[i] || { title: slug, desc: "" };
+      return { title: item.title, slug, href: `#/services/${slug}` };
+    });
+  }, [t.services_list]);
+
+  const openNow = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setMenuOpen(true);
+  };
+  const closeSoon = (delay = 140) => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setMenuOpen(false), delay);
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 bg-white">
       <div className="relative mx-auto max-w-6xl px-4">
-        {/* Top-right buttons — ensure above dropdown */}
+        {/* Top-right buttons */}
         <div className="absolute right-4 top-2 z-50 flex gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
@@ -131,18 +148,17 @@ function Header({ t, lang, setLang }) {
               />
             </a>
 
-            {/* NAV with Services dropdown */}
+            {/* NAV with dropdown */}
             <nav className="mt-2 flex items-center justify-center gap-10 text-sm font-medium text-gray-700 relative z-20">
               <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
                 <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
               </a>
 
-              {/* Services dropdown (hover OR click to open) */}
               <div
                 className="relative"
                 ref={menuRef}
-                onMouseEnter={() => setMenuOpen(true)}
-                onMouseLeave={() => setMenuOpen(false)}
+                onMouseEnter={openNow}
+                onMouseLeave={() => closeSoon(140)}
               >
                 <button
                   type="button"
@@ -160,10 +176,10 @@ function Header({ t, lang, setLang }) {
                   />
                 </button>
 
-                {/* Dropdown panel with animation */}
+                {/* No gap: mt-0 to avoid flicker; animated open/close */}
                 <div
                   className={[
-                    "absolute left-0 mt-2 w-64 rounded-lg border border-gray-100 bg-white shadow-lg z-40 origin-top-left",
+                    "absolute left-0 mt-0 w-64 rounded-lg border border-gray-100 bg-white shadow-lg z-40 origin-top-left",
                     "transition-all duration-150 ease-out",
                     menuOpen
                       ? "opacity-100 scale-100 pointer-events-auto"
@@ -172,7 +188,6 @@ function Header({ t, lang, setLang }) {
                   role="menu"
                 >
                   <ul className="p-2 text-sm text-gray-700">
-                    {/* Main services link */}
                     <li>
                       <a
                         href="#/services"
@@ -180,11 +195,10 @@ function Header({ t, lang, setLang }) {
                         onClick={() => setMenuOpen(false)}
                         role="menuitem"
                       >
-                        {t.nav_services} — All
+                        {t.services_all}
                       </a>
                     </li>
                     <li><hr className="my-1 border-gray-100" /></li>
-                    {/* Items */}
                     {serviceLinks.map((link) => (
                       <li key={link.slug}>
                         <a
@@ -217,12 +231,12 @@ function Header({ t, lang, setLang }) {
   );
 }
 
-/* Reserve space so content doesn't slide under the fixed header */
+/* Space so content doesn't sit under fixed header */
 function HeaderSpacer() {
   return <div className="h-[150px] md:h-[160px]" />;
 }
 
-/* --------------------------------- Footer -------------------------------- */
+/* ------------------------------------ Footer ----------------------------------- */
 function Footer({ t }) {
   return (
     <footer className="border-t border-gray-100 bg-white">
@@ -241,12 +255,11 @@ function Footer({ t }) {
   );
 }
 
-/* --------------------------------- Pages -------------------------------- */
+/* -------------------------------------- Pages ----------------------------------- */
 function Home({ t }) {
   const valueIcons = [IconTarget, IconRocket, IconChart];
   return (
     <>
-      {/* Hero */}
       <section className="border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
@@ -268,7 +281,6 @@ function Home({ t }) {
             </div>
           </div>
 
-          {/* Quick info cards */}
           <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
             <ul className="grid grid-cols-2 gap-4 text-sm text-gray-700">
               <InfoCard label={t.kv.positioning_label} value={t.kv.positioning} />
@@ -280,7 +292,6 @@ function Home({ t }) {
         </div>
       </section>
 
-      {/* Value */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
           <IconStar className="w-6 h-6 text-indigo-600" /> {t.value_title}
@@ -314,24 +325,25 @@ function About({ t }) {
 }
 
 function Services({ t, route }) {
-  // Example routes: "services", "services/consulting-desk"
   const parts = route.split("/");
   const subSlug = parts.length > 1 ? parts[1] : "";
 
-  const services = useMemo(
-    () => (t.services_list || []).map((s, i) => ({ ...s, slug: slugify(s.title), idx: i })),
-    [t.services_list]
-  );
+  const services = useMemo(() => {
+    const list = t.services_list || [];
+    return SERVICE_KEYS.map((slug, i) => ({
+      slug,
+      idx: i,
+      title: list[i]?.title || slug,
+      desc: list[i]?.desc || "",
+    }));
+  }, [t.services_list]);
 
-  // detail page
   if (subSlug) {
     const match = services.find((s) => s.slug === subSlug);
     if (match) {
       const Icon = [IconBriefcase, IconBuilding, IconTruck, IconBoxes, IconMegaphone, IconLink][
         match.idx % 6
       ];
-
-      // Pull structured detail content; fallback to generic
       const detail = (t.services_detail && t.services_detail[match.slug]) || {};
       const hero = detail.hero || match.title;
       const intro = detail.intro || match.desc;
@@ -340,20 +352,16 @@ function Services({ t, route }) {
 
       return (
         <section className="mx-auto max-w-6xl px-4 py-16">
-          {/* Mini breadcrumb */}
           <div className="text-sm text-gray-500">
             <a href="#/services" className="hover:text-indigo-700">← {t.services_title}</a>
           </div>
 
-          {/* Hero line */}
           <h1 className="mt-3 flex items-center gap-2 text-3xl font-bold text-gray-900 md:text-4xl">
             <Icon className="w-7 h-7 text-indigo-600" /> {hero}
           </h1>
 
-          {/* Intro */}
           <p className="mt-4 max-w-3xl text-gray-700">{intro}</p>
 
-          {/* Bullets */}
           {bullets.length > 0 && (
             <ul className="mt-6 space-y-2 text-gray-700">
               {bullets.map((b, i) => (
@@ -365,7 +373,6 @@ function Services({ t, route }) {
             </ul>
           )}
 
-          {/* CTA */}
           <div className="mt-8">
             <a
               href={cta.href}
@@ -379,7 +386,6 @@ function Services({ t, route }) {
     }
   }
 
-  // grid page
   return (
     <PageShell
       title={
@@ -536,7 +542,7 @@ function Contact({ t }) {
   );
 }
 
-/* ------------------------------- UI Helpers ------------------------------ */
+/* -------------------------------- UI Helpers -------------------------------- */
 function PageShell({ title, children, bg, padded }) {
   return (
     <section className={bg ? "bg-indigo-50/50" : ""}>
@@ -569,7 +575,7 @@ function InfoCard({ label, value }) {
   );
 }
 
-/* ------------------------------ Tiny SVG Icons --------------------------- */
+/* -------------------------------- Icons -------------------------------- */
 function IconInfo({ className = "w-4 h-4" }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -615,11 +621,6 @@ function IconBoxes({ className = "w-5 h-5" }) { return (<svg viewBox="0 0 24 24"
 function IconMegaphone({ className = "w-5 h-5" }) { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 5V5L6 10H4a1 1 0 0 0-1 1z"/><path d="M14 7a4 4 0 0 1 0 10"/></svg>); }
 function IconLink({ className = "w-5 h-5" }) { return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 1 0-7l1-1a5 5 0 0 1 7 7l-1 1"/><path d="M14 11a5 5 0 0 1 0 7l-1 1a5 5 0 1 1-7-7l1-1"/></svg>); }
 
-/* ------------------------------ helpers --------------------------- */
-function slugify(s) {
-  return String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
-
 /* ------------------------------ i18n ------------------------------ */
 const i18n = {
   en: {
@@ -627,6 +628,7 @@ const i18n = {
     nav_services: "Services",
     nav_member: "Member Upload",
     nav_contact: "Contact",
+    services_all: "Services — All",
     contact_cta: "Contact Us",
     primary_cta: "View Services",
     secondary_cta: "About Us",
@@ -667,7 +669,6 @@ const i18n = {
       { title: "MASHLAB Marketing", desc: "Influencer/UGC campaigns with measurable results." },
       { title: "Cooperation Entry", desc: "Submit intent form or connect via API to start quickly." },
     ],
-    /* Structured per-service detail (edit these later with your real copy) */
     services_detail: {
       "consulting-desk": {
         hero: "Consulting Desk",
@@ -761,6 +762,7 @@ const i18n = {
     nav_services: "业务板块",
     nav_member: "会员上传",
     nav_contact: "联系我们",
+    services_all: "全部业务",
     contact_cta: "联系我们",
     primary_cta: "查看业务",
     secondary_cta: "了解我们",
