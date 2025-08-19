@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /**
- * MashBond — App.jsx (Services subpages)
- * - Logo centered (click → Home), larger (140px cap)
- * - Top-right Lang + Contact (absolute; no extra vertical space)
- * - Nav with icons; Services has a dropdown
- * - Each Services item is a real page: #/services/<slug>
- * - #/services shows all cards; subroutes show a single service page
- * - Smooth header + tight spacing
+ * MashBond — App.jsx (animated dropdown + click fixes + services subpages)
+ * - Animated Services dropdown (fade+scale), closes on leave/click/outside/route-change
+ * - Top-right Lang/Contact buttons are clickable (z-50)
+ * - Each Services item is a subpage: #/services/<slug>
+ * - #/services shows all cards; subroutes show one service page with details
+ * - Logo centered; minimal masthead
  * - i18n-ready (EN/简体中文)
  * - Logo path: /public/logo.png
  */
@@ -58,12 +57,29 @@ function getRoute() {
 /* --------------------------------- Header -------------------------------- */
 function Header({ t, lang, setLang }) {
   const [hidden, setHidden] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
+  // shrink/hide masthead on scroll
   useEffect(() => {
     const onScroll = () => setHidden((window.scrollY || 0) > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // close dropdown on outside click and on route change
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    const onHash = () => setMenuOpen(false);
+    document.addEventListener("click", onDocClick);
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      document.removeEventListener("click", onDocClick);
+      window.removeEventListener("hashchange", onHash);
+    };
   }, []);
 
   // Build dropdown items (title → slug)
@@ -80,8 +96,8 @@ function Header({ t, lang, setLang }) {
   return (
     <header className="fixed inset-x-0 top-0 z-30 bg-white">
       <div className="relative mx-auto max-w-6xl px-4">
-        {/* Top-right buttons (absolute so they don't add height) */}
-        <div className="absolute right-4 top-2 flex gap-3">
+        {/* Top-right buttons — ensure above dropdown */}
+        <div className="absolute right-4 top-2 z-50 flex gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
             className="rounded-xl border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
@@ -115,24 +131,67 @@ function Header({ t, lang, setLang }) {
               />
             </a>
 
-            {/* NAV with Services dropdown (all links clickable) */}
-            <nav className="mt-2 flex items-center justify-center gap-10 text-sm font-medium text-gray-700">
+            {/* NAV with Services dropdown */}
+            <nav className="mt-2 flex items-center justify-center gap-10 text-sm font-medium text-gray-700 relative z-20">
               <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
                 <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
               </a>
 
-              <div className="relative group">
-                <a href="#/services" className="flex items-center gap-2 hover:text-indigo-700">
+              {/* Services dropdown (hover OR click to open) */}
+              <div
+                className="relative"
+                ref={menuRef}
+                onMouseEnter={() => setMenuOpen(true)}
+                onMouseLeave={() => setMenuOpen(false)}
+              >
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  className="flex items-center gap-2 hover:text-indigo-700"
+                  onClick={() => setMenuOpen((v) => !v)}
+                >
                   <IconBriefcase className="w-4 h-4 text-indigo-600" /> {t.nav_services}
-                  <IconChevronDown className="w-4 h-4 text-gray-500 group-hover:text-indigo-600" />
-                </a>
-                <div className="absolute left-0 mt-2 hidden w-64 rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
+                  <IconChevronDown
+                    className={[
+                      "w-4 h-4 text-gray-500 transition-transform",
+                      menuOpen ? "rotate-180 text-indigo-600" : "",
+                    ].join(" ")}
+                  />
+                </button>
+
+                {/* Dropdown panel with animation */}
+                <div
+                  className={[
+                    "absolute left-0 mt-2 w-64 rounded-lg border border-gray-100 bg-white shadow-lg z-40 origin-top-left",
+                    "transition-all duration-150 ease-out",
+                    menuOpen
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 scale-95 pointer-events-none",
+                  ].join(" ")}
+                  role="menu"
+                >
                   <ul className="p-2 text-sm text-gray-700">
+                    {/* Main services link */}
+                    <li>
+                      <a
+                        href="#/services"
+                        className="block rounded-md px-3 py-2 font-medium text-gray-800 hover:bg-indigo-50 hover:text-indigo-700"
+                        onClick={() => setMenuOpen(false)}
+                        role="menuitem"
+                      >
+                        {t.nav_services} — All
+                      </a>
+                    </li>
+                    <li><hr className="my-1 border-gray-100" /></li>
+                    {/* Items */}
                     {serviceLinks.map((link) => (
                       <li key={link.slug}>
                         <a
                           href={link.href}
                           className="block rounded-md px-3 py-2 hover:bg-indigo-50 hover:text-indigo-700"
+                          onClick={() => setMenuOpen(false)}
+                          role="menuitem"
                         >
                           {link.title}
                         </a>
@@ -271,27 +330,51 @@ function Services({ t, route }) {
       const Icon = [IconBriefcase, IconBuilding, IconTruck, IconBoxes, IconMegaphone, IconLink][
         match.idx % 6
       ];
-      return (
-        <PageShell
-          title={
-            <span className="flex items-center gap-2">
-              <Icon className="w-6 h-6 text-indigo-600" /> {match.title}
-            </span>
-          }
-          padded
-        >
-          <p className="max-w-3xl text-gray-700">{match.desc}</p>
 
-          {/* Optional: link back to all services */}
+      // Pull structured detail content; fallback to generic
+      const detail = (t.services_detail && t.services_detail[match.slug]) || {};
+      const hero = detail.hero || match.title;
+      const intro = detail.intro || match.desc;
+      const bullets = detail.bullets || [];
+      const cta = detail.cta || { text: t.contact_cta, href: "#/contact" };
+
+      return (
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          {/* Mini breadcrumb */}
+          <div className="text-sm text-gray-500">
+            <a href="#/services" className="hover:text-indigo-700">← {t.services_title}</a>
+          </div>
+
+          {/* Hero line */}
+          <h1 className="mt-3 flex items-center gap-2 text-3xl font-bold text-gray-900 md:text-4xl">
+            <Icon className="w-7 h-7 text-indigo-600" /> {hero}
+          </h1>
+
+          {/* Intro */}
+          <p className="mt-4 max-w-3xl text-gray-700">{intro}</p>
+
+          {/* Bullets */}
+          {bullets.length > 0 && (
+            <ul className="mt-6 space-y-2 text-gray-700">
+              {bullets.map((b, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="mt-[6px] inline-block h-2 w-2 rounded-full bg-indigo-600" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* CTA */}
           <div className="mt-8">
             <a
-              href="#/services"
-              className="rounded-xl border border-indigo-200 px-4 py-2 text-indigo-700 hover:bg-indigo-50"
+              href={cta.href}
+              className="rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white hover:bg-indigo-700"
             >
-              ← Back to all services
+              {cta.text}
             </a>
           </div>
-        </PageShell>
+        </section>
       );
     }
   }
@@ -584,6 +667,75 @@ const i18n = {
       { title: "MASHLAB Marketing", desc: "Influencer/UGC campaigns with measurable results." },
       { title: "Cooperation Entry", desc: "Submit intent form or connect via API to start quickly." },
     ],
+    /* Structured per-service detail (edit these later with your real copy) */
+    services_detail: {
+      "consulting-desk": {
+        hero: "Consulting Desk",
+        intro: "We help you identify the right market entry, refine brand positioning, and plan the most effective channel mix.",
+        bullets: [
+          "Market research & competitor mapping",
+          "Brand diagnosis & value proposition",
+          "Channel prioritization & GTM plan",
+          "Pricing & localization guidance",
+        ],
+        cta: { text: "Book a consulting call", href: "#/contact" },
+      },
+      "la-showroom-rental": {
+        hero: "LA Showroom Rental",
+        intro: "Use our Los Angeles showroom for product demos, B2B meetings, and conversion-boosting experiences.",
+        bullets: [
+          "Prime LA location for buyers",
+          "Scene-based product displays",
+          "On-site meetings & hosting",
+          "Flexible rental terms",
+        ],
+        cta: { text: "Check availability", href: "#/contact" },
+      },
+      "logistics-overseas-warehouses": {
+        hero: "Logistics & Overseas Warehouses",
+        intro: "Multi-country warehousing and end-to-end logistics that reduce costs and speed up delivery.",
+        bullets: [
+          "US/CA/MX multi-warehouse network",
+          "Reverse logistics & RMA processing",
+          "Last-mile delivery & tracking",
+          "Customs & compliance support",
+        ],
+        cta: { text: "Optimize your logistics", href: "#/contact" },
+      },
+      "b2b-bbs-supply-platform": {
+        hero: "B2B / BBS Supply Platform",
+        intro: "Wholesale, dropship, and social referral mechanics to accelerate distribution.",
+        bullets: [
+          "Qualified wholesale catalog",
+          "One-click dropship options",
+          "Referral & invite-based growth",
+          "Dashboard & order sync",
+        ],
+        cta: { text: "Request platform access", href: "#/contact" },
+      },
+      "mashlab-marketing": {
+        hero: "MASHLAB Marketing",
+        intro: "Influencer and UGC campaigns designed for measurable outcomes and sustainable growth.",
+        bullets: [
+          "Creator matching & brief design",
+          "UGC content kits",
+          "Attribution & reporting",
+          "Iterative creative testing",
+        ],
+        cta: { text: "Plan a campaign", href: "#/contact" },
+      },
+      "cooperation-entry": {
+        hero: "Cooperation Entry",
+        intro: "Kick off with a simple intent form or connect via API to start fast.",
+        bullets: [
+          "Partnership intake form",
+          "API integration options",
+          "Timeline & milestones",
+          "Onboarding checklist",
+        ],
+        cta: { text: "Start collaboration", href: "#/contact" },
+      },
+    },
     contact_title: "Contact MashBond",
     contact_blurb: "Tell us your needs and we will propose a cross-border growth plan.",
     contact_email: "Email",
@@ -648,6 +800,44 @@ const i18n = {
       { title: "MASHLAB 营销案例", desc: "网红推广、UGC 方案与复盘数据。" },
       { title: "合作入口", desc: "提交意向表或 API 对接，快速启动合作。" },
     ],
+    services_detail: {
+      "consulting-desk": {
+        hero: "顾问对接",
+        intro: "明确市场切入与渠道优先级，梳理品牌定位与策略动作。",
+        bullets: ["市场研究与竞品分析", "品牌诊断与价值主张", "渠道优先级与GTM计划", "定价与本地化建议"],
+        cta: { text: "预约顾问通话", href: "#/contact" },
+      },
+      "la-showroom-rental": {
+        hero: "LA 展示厅租赁",
+        intro: "用于产品演示、B2B会谈与转化提升的线下空间。",
+        bullets: ["洛杉矶优越地理位置", "场景化陈列", "现场商务接待", "灵活租期"],
+        cta: { text: "查看档期", href: "#/contact" },
+      },
+      "logistics-overseas-warehouses": {
+        hero: "物流与海外仓",
+        intro: "多国仓配网络与端到端履约，降低成本并提升时效。",
+        bullets: ["美加墨多仓", "逆向物流/售后处理", "尾程派送与追踪", "清关与合规支持"],
+        cta: { text: "优化物流方案", href: "#/contact" },
+      },
+      "b2b-bbs-supply-platform": {
+        hero: "B2B / BBS 供销平台",
+        intro: "批发、一件代发与社交裂变机制，加速分销效率。",
+        bullets: ["合格批发目录", "一键代发", "邀请码与社交拉新", "数据看板与订单同步"],
+        cta: { text: "申请平台权限", href: "#/contact" },
+      },
+      "mashlab-marketing": {
+        hero: "MASHLAB 营销案例",
+        intro: "以可衡量结果为导向的红人/UGC增长方案。",
+        bullets: ["创作者匹配与Brief", "UGC内容工具包", "归因与数据报告", "创意迭代测试"],
+        cta: { text: "定制营销方案", href: "#/contact" },
+      },
+      "cooperation-entry": {
+        hero: "合作入口",
+        intro: "提交意向或API对接，快速启动合作。",
+        bullets: ["合作意向表单", "API对接选项", "里程碑与排期", "入驻清单"],
+        cta: { text: "开始合作", href: "#/contact" },
+      },
+    },
     contact_title: "联系 MashBond",
     contact_blurb: "留下您的需求，我们将为您制定跨境增长方案。",
     contact_email: "邮箱",
