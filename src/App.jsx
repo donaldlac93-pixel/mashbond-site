@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 /**
- * MashBond — App.jsx (Services dropdown + deep-link anchors)
+ * MashBond — App.jsx (Services subpages)
  * - Logo centered (click → Home), larger (140px cap)
  * - Top-right Lang + Contact (absolute; no extra vertical space)
- * - Minimal nav + icons; Services has a dropdown populated from i18n.services_list
- * - Deep links: #/services?section=<slug> → auto-scroll to that card
- * - Smooth scroll with header offset
- * - English hero is one line; Chinese can be two
+ * - Nav with icons; Services has a dropdown
+ * - Each Services item is a real page: #/services/<slug>
+ * - #/services shows all cards; subroutes show a single service page
+ * - Smooth header + tight spacing
+ * - i18n-ready (EN/简体中文)
  * - Logo path: /public/logo.png
  */
 
@@ -33,10 +34,12 @@ function Router() {
       <HeaderSpacer />
       {route === "home" && <Home t={t} />}
       {route === "about" && <About t={t} />}
-      {route === "services" && <Services t={t} />}
+      {route.startsWith("services") && <Services t={t} route={route} />}
       {route === "member-upload" && <MemberUpload t={t} />}
       {route === "contact" && <Contact t={t} />}
-      {!["home", "about", "services", "member-upload", "contact"].includes(route) && (
+      {!["home", "about", "services", "member-upload", "contact"].some((r) =>
+        route.startsWith(r)
+      ) && (
         <PageShell title="404">
           <p className="mt-4 text-gray-700">Page not found.</p>
         </PageShell>
@@ -69,7 +72,7 @@ function Header({ t, lang, setLang }) {
       (t.services_list || []).map((s) => ({
         title: s.title,
         slug: slugify(s.title),
-        href: `#/services?section=${slugify(s.title)}`,
+        href: `#/services/${slugify(s.title)}`,
       })),
     [t.services_list]
   );
@@ -77,7 +80,7 @@ function Header({ t, lang, setLang }) {
   return (
     <header className="fixed inset-x-0 top-0 z-30 bg-white">
       <div className="relative mx-auto max-w-6xl px-4">
-        {/* Top-right buttons */}
+        {/* Top-right buttons (absolute so they don't add height) */}
         <div className="absolute right-4 top-2 flex gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
@@ -112,17 +115,17 @@ function Header({ t, lang, setLang }) {
               />
             </a>
 
-            {/* NAV with Services dropdown */}
+            {/* NAV with Services dropdown (all links clickable) */}
             <nav className="mt-2 flex items-center justify-center gap-10 text-sm font-medium text-gray-700">
               <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
                 <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
               </a>
 
               <div className="relative group">
-                <button className="flex items-center gap-2 hover:text-indigo-700">
+                <a href="#/services" className="flex items-center gap-2 hover:text-indigo-700">
                   <IconBriefcase className="w-4 h-4 text-indigo-600" /> {t.nav_services}
                   <IconChevronDown className="w-4 h-4 text-gray-500 group-hover:text-indigo-600" />
-                </button>
+                </a>
                 <div className="absolute left-0 mt-2 hidden w-64 rounded-lg border border-gray-100 bg-white shadow-lg group-hover:block">
                   <ul className="p-2 text-sm text-gray-700">
                     {serviceLinks.map((link) => (
@@ -184,6 +187,7 @@ function Home({ t }) {
   const valueIcons = [IconTarget, IconRocket, IconChart];
   return (
     <>
+      {/* Hero */}
       <section className="border-b border-gray-100 bg-gradient-to-b from-indigo-50 to-white">
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 py-16 md:grid-cols-2 md:py-24">
           <div>
@@ -205,6 +209,7 @@ function Home({ t }) {
             </div>
           </div>
 
+          {/* Quick info cards */}
           <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
             <ul className="grid grid-cols-2 gap-4 text-sm text-gray-700">
               <InfoCard label={t.kv.positioning_label} value={t.kv.positioning} />
@@ -216,6 +221,7 @@ function Home({ t }) {
         </div>
       </section>
 
+      {/* Value */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-900 md:text-3xl">
           <IconStar className="w-6 h-6 text-indigo-600" /> {t.value_title}
@@ -248,42 +254,49 @@ function About({ t }) {
   );
 }
 
-function Services({ t }) {
-  // Build refs for each service (slug → ref)
-  const refs = useRef({});
-  const servicesWithSlug = useMemo(
-    () =>
-      (t.services_list || []).map((s) => ({ ...s, slug: slugify(s.title) })),
+function Services({ t, route }) {
+  // Example routes: "services", "services/consulting-desk"
+  const parts = route.split("/");
+  const subSlug = parts.length > 1 ? parts[1] : "";
+
+  const services = useMemo(
+    () => (t.services_list || []).map((s, i) => ({ ...s, slug: slugify(s.title), idx: i })),
     [t.services_list]
   );
 
-  // On mount and on hash change, scroll to selected section if provided
-  useEffect(() => {
-    const handleScrollToSection = () => {
-      const hash = window.location.hash || "";
-      // extract ?section=slug from "#/services?section=slug"
-      const qIndex = hash.indexOf("?");
-      let sectionSlug = "";
-      if (qIndex !== -1) {
-        const params = new URLSearchParams(hash.slice(qIndex + 1));
-        sectionSlug = params.get("section") || "";
-      } else {
-        // support legacy "#/services#slug"
-        const parts = hash.split("#");
-        sectionSlug = parts.length > 2 ? parts[2] : "";
-      }
-      if (sectionSlug && refs.current[sectionSlug]) {
-        const el = refs.current[sectionSlug];
-        const rectTop = el.getBoundingClientRect().top + window.scrollY;
-        const offset = 110; // header offset
-        window.scrollTo({ top: rectTop - offset, behavior: "smooth" });
-      }
-    };
-    handleScrollToSection();
-    window.addEventListener("hashchange", handleScrollToSection);
-    return () => window.removeEventListener("hashchange", handleScrollToSection);
-  }, []);
+  // detail page
+  if (subSlug) {
+    const match = services.find((s) => s.slug === subSlug);
+    if (match) {
+      const Icon = [IconBriefcase, IconBuilding, IconTruck, IconBoxes, IconMegaphone, IconLink][
+        match.idx % 6
+      ];
+      return (
+        <PageShell
+          title={
+            <span className="flex items-center gap-2">
+              <Icon className="w-6 h-6 text-indigo-600" /> {match.title}
+            </span>
+          }
+          padded
+        >
+          <p className="max-w-3xl text-gray-700">{match.desc}</p>
 
+          {/* Optional: link back to all services */}
+          <div className="mt-8">
+            <a
+              href="#/services"
+              className="rounded-xl border border-indigo-200 px-4 py-2 text-indigo-700 hover:bg-indigo-50"
+            >
+              ← Back to all services
+            </a>
+          </div>
+        </PageShell>
+      );
+    }
+  }
+
+  // grid page
   return (
     <PageShell
       title={
@@ -294,20 +307,15 @@ function Services({ t }) {
       padded
     >
       <p className="max-w-4xl text-gray-700">{t.services_intro}</p>
-
       <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {servicesWithSlug.map((s, idx) => {
+        {services.map((s) => {
           const Icon = [IconBriefcase, IconBuilding, IconTruck, IconBoxes, IconMegaphone, IconLink][
-            idx % 6
+            s.idx % 6
           ];
           return (
-            <div
-              key={s.slug}
-              id={`svc-${s.slug}`}
-              ref={(node) => (refs.current[s.slug] = node)}
-            >
+            <a key={s.slug} href={`#/services/${s.slug}`} className="block">
               <Card title={s.title} desc={s.desc} Icon={Icon} />
-            </div>
+            </a>
           );
         })}
       </div>
@@ -321,10 +329,8 @@ function MemberUpload({ t }) {
 
   function onSelect(e) {
     const input = e.currentTarget || e.target;
-    const list = input && input.files ? input.files : [];
-    const fs = Array.from(list);
+    const fs = Array.from(input?.files || []);
     setFiles(fs);
-
     const readers = fs.map(
       (f) =>
         new Promise((res) => {
@@ -368,18 +374,9 @@ function MemberUpload({ t }) {
           <>
             <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
               {previews.map((p) => (
-                <div
-                  key={p.name}
-                  className="overflow-hidden rounded-xl border border-gray-100"
-                >
-                  <img
-                    src={p.src}
-                    alt={p.name}
-                    className="aspect-square w-full object-cover"
-                  />
-                  <div className="truncate px-2 py-1 text-xs text-gray-600">
-                    {p.name}
-                  </div>
+                <div key={p.name} className="overflow-hidden rounded-xl border border-gray-100">
+                  <img src={p.src} alt={p.name} className="aspect-square w-full object-cover" />
+                  <div className="truncate px-2 py-1 text-xs text-gray-600">{p.name}</div>
                 </div>
               ))}
             </div>
@@ -572,10 +569,13 @@ const i18n = {
       { title: "Data-Driven", desc: "Continuous optimization with measurable metrics and retrospectives." },
     ],
     about_title: "Who We Are",
-    about_blurb_1: "MashBond connects brands, creators, media and supply chain with a consulting-first approach to help Asian brands scale globally.",
-    about_blurb_2: "We combine market research, channel prioritization and execution methodology with offline showrooming and cross-border fulfillment.",
+    about_blurb_1:
+      "MashBond connects brands, creators, media and supply chain with a consulting-first approach to help Asian brands scale globally.",
+    about_blurb_2:
+      "We combine market research, channel prioritization and execution methodology with offline showrooming and cross-border fulfillment.",
     services_title: "What We Do",
-    services_intro: "From diagnosis & strategy to execution: market entry, creator marketing and cross-border logistics in one plan.",
+    services_intro:
+      "From diagnosis & strategy to execution: market entry, creator marketing and cross-border logistics in one plan.",
     services_list: [
       { title: "Consulting Desk", desc: "Brand diagnosis, entry strategy and channel prioritization." },
       { title: "LA Showroom Rental", desc: "Physical showcase & meetings to boost conversion." },
@@ -633,10 +633,13 @@ const i18n = {
       { title: "数据驱动", desc: "用可量化指标与复盘机制持续优化投入产出。" },
     ],
     about_title: "关于我们",
-    about_blurb_1: "MashBond（美销邦）以“咨询为先”连接品牌、创作者、媒体与供应链，帮助亚洲品牌高效出海并实现长期增长。",
-    about_blurb_2: "我们通过市场研究、渠道优先级与执行方法论，结合线下展示与跨境履约，确保策略落地与持续增长。",
+    about_blurb_1:
+      "MashBond（美销邦）以“咨询为先”连接品牌、创作者、媒体与供应链，帮助亚洲品牌高效出海并实现长期增长。",
+    about_blurb_2:
+      "我们通过市场研究、渠道优先级与执行方法论，结合线下展示与跨境履约，确保策略落地与持续增长。",
     services_title: "业务板块",
-    services_intro: "从诊断与策略到落地执行：为品牌提供市场进入、内容营销与跨境物流的一体化方案。",
+    services_intro:
+      "从诊断与策略到落地执行：为品牌提供市场进入、内容营销与跨境物流的一体化方案。",
     services_list: [
       { title: "顾问对接", desc: "品牌诊断、市场进入与渠道优先级规划。" },
       { title: "LA 展示厅租赁", desc: "线下场景展示与商务接待，提高转化。" },
