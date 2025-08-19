@@ -627,8 +627,8 @@ const i18n = {
     primary_cta: "View Services",
     secondary_cta: "About Us",
     tagline: "Consulting First · S2B2C Cross-Border Ecosystem",
-    hero_line1: "MashBond — Let Asia Shine",
-    hero_line2: "Globally",
+    hero_line1: "MashBond — Let Asia Shine Globally",
+    hero_line2: "",
     hero_sub:
       "Mission: Empower · Connect · Grow | Core Principle: Enable first, grow together.",
     kv: {
