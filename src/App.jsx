@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
  * Pages: Home, About, Services, Member Upload, Contact
  * Router: #/about, #/services, #/member-upload, #/contact
  * Light theme; two-color (white + indigo)
- * Header logo: /public/logo.png
+ * Header logo: /public/logo.png  ← change src below if your name differs
  */
 
 export default function App() {
@@ -47,24 +47,28 @@ function getRoute() {
   return hash || "home";
 }
 
+/* --------------------------------- Header -------------------------------- */
 function Header({ t, lang, setLang }) {
   return (
     <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-
-        {/* Brand (logo + name) */}
+        {/* Logo + Brand */}
         <a href="#/" className="flex items-center gap-3 shrink-0">
           <img
-            src="/logo.png"            // <-- your renamed file in public/
-            alt="MashBond logo"
+            src="/logo.png"             // <-- make sure public/logo.png exists (case sensitive on Vercel)
+            alt="MashBond Logo"
             className="h-12 w-12 md:h-14 md:w-14 object-contain"
             loading="eager"
             decoding="async"
+            onError={(e) => {
+              // graceful fallback if logo missing
+              e.currentTarget.style.display = "none";
+            }}
           />
           <span className="text-xl font-bold tracking-wide text-gray-900">MashBond</span>
         </a>
 
-        {/* Nav */}
+        {/* Navigation */}
         <nav className="hidden items-center gap-6 text-sm md:flex">
           <a href="#/about" className="hover:text-indigo-700">{t.nav_about}</a>
           <a href="#/services" className="hover:text-indigo-700">{t.nav_services}</a>
@@ -72,7 +76,7 @@ function Header({ t, lang, setLang }) {
           <a href="#/contact" className="hover:text-indigo-700">{t.nav_contact}</a>
         </nav>
 
-        {/* Actions */}
+        {/* Lang + CTA */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
@@ -92,6 +96,7 @@ function Header({ t, lang, setLang }) {
   );
 }
 
+/* --------------------------------- Footer -------------------------------- */
 function Footer({ t }) {
   return (
     <footer className="border-t border-gray-100 bg-white">
