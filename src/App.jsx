@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 
 /**
  * MashBond — App.jsx
- * - Centered masthead: logo centered (clickable → Home), categories under logo
- * - Top-right: Language toggle + Contact button
- * - Masthead fades/hides on scroll
- * - Nav sits ABOVE a subtle divider line
- * - Small inline SVG icons (no extra dependencies)
- * - Logo cap: 140px (adjust in Header style if needed)
- * - Logo path: /public/logo.png
+ * - Logo centered (click → Home), larger (140px cap)
+ * - Top-right Language + Contact (absolute; no extra vertical space)
+ * - Minimal nav with icons under logo
+ * - Header fades out on scroll
+ * - Tight top spacing; reduced spacer
+ * - English hero shows on ONE line; Chinese can use two lines
+ * - Logo file: /public/logo.png
  */
 
 export default function App() {
@@ -56,75 +56,71 @@ function Header({ t, lang, setLang }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY || 0;
-      setHidden(y > 80);
-    };
+    const onScroll = () => setHidden((window.scrollY || 0) > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-30 bg-white/95 backdrop-blur">
-      {/* Utility bar (top-right actions) */}
-      <div className="mx-auto max-w-6xl px-4 pt-1">
-        <div className="flex justify-end gap-3">
+    <header className="fixed inset-x-0 top-0 z-30 bg-white">
+      {/* Make container relative so we can absolutely place the buttons */}
+      <div className="relative mx-auto max-w-6xl px-4">
+        {/* Top-right buttons (no longer add height) */}
+        <div className="absolute right-4 top-2 flex gap-3">
           <button
             onClick={() => setLang(lang === "zh" ? "en" : "zh")}
-            className="pointer-events-auto rounded-xl border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+            className="rounded-xl border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
           >
             {lang === "zh" ? "English" : "简体中文"}
           </button>
           <a
-            className="pointer-events-auto rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
             href="#/contact"
           >
             {t.contact_cta}
           </a>
         </div>
-      </div>
 
-      {/* Centered masthead */}
-      <div
-        className={[
-          "transition-all duration-300 ease-out",
-          "mx-auto max-w-6xl px-4",
-          hidden ? "opacity-0 -translate-y-3 pointer-events-none" : "opacity-100 translate-y-0"
-        ].join(" ")}
-      >
-        <div className="pt-0 text-center">
-          {/* Logo → Home; larger cap */}
-          <a href="#/">
-            <img
-              src="/logo.png"
-              alt="MashBond Logo"
-              className="mx-auto object-contain hover:opacity-90 transition"
-              style={{ maxHeight: "140px" }}
-              loading="eager"
-              decoding="async"
-            />
-          </a>
+        {/* Centered masthead */}
+        <div
+          className={[
+            "transition-all duration-300 ease-out",
+            hidden ? "opacity-0 -translate-y-3 pointer-events-none" : "opacity-100 translate-y-0",
+          ].join(" ")}
+        >
+          <div className="pt-1 text-center">
+            {/* Logo → Home; large but tight to top */}
+            <a href="#/">
+              <img
+                src="/logo.png"
+                alt="MashBond Logo"
+                className="mx-auto object-contain hover:opacity-90 transition"
+                style={{ maxHeight: "140px" }}
+                loading="eager"
+                decoding="async"
+              />
+            </a>
 
-          {/* NAV ABOVE the line */}
-          <nav className="mt-3 flex items-center justify-center gap-8 text-sm font-medium text-gray-700">
-            <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
-              <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
-            </a>
-            <a href="#/services" className="flex items-center gap-2 hover:text-indigo-700">
-              <IconBriefcase className="w-4 h-4 text-indigo-600" /> {t.nav_services}
-            </a>
-            <a href="#/member-upload" className="flex items-center gap-2 hover:text-indigo-700">
-              <IconUpload className="w-4 h-4 text-indigo-600" /> {t.nav_member}
-            </a>
-            <a href="#/contact" className="flex items-center gap-2 hover:text-indigo-700">
-              <IconMail className="w-4 h-4 text-indigo-600" /> {t.nav_contact}
-            </a>
-          </nav>
+            {/* Nav under logo (no divider line) */}
+            <nav className="mt-2 flex items-center justify-center gap-10 text-sm font-medium text-gray-700">
+              <a href="#/about" className="flex items-center gap-2 hover:text-indigo-700">
+                <IconInfo className="w-4 h-4 text-indigo-600" /> {t.nav_about}
+              </a>
+              <a href="#/services" className="flex items-center gap-2 hover:text-indigo-700">
+                <IconBriefcase className="w-4 h-4 text-indigo-600" /> {t.nav_services}
+              </a>
+              <a href="#/member-upload" className="flex items-center gap-2 hover:text-indigo-700">
+                <IconUpload className="w-4 h-4 text-indigo-600" /> {t.nav_member}
+              </a>
+              <a href="#/contact" className="flex items-center gap-2 hover:text-indigo-700">
+                <IconMail className="w-4 h-4 text-indigo-600" /> {t.nav_contact}
+              </a>
+            </nav>
 
-          {/* Divider line BELOW the nav */}
-          <div className="mt-3 h-px bg-gray-100" />
-          <div className="pb-3" />
+            {/* tiny breathing room only */}
+            <div className="pb-1" />
+          </div>
         </div>
       </div>
     </header>
@@ -133,7 +129,8 @@ function Header({ t, lang, setLang }) {
 
 /* Reserve space so content doesn't slide under the fixed header */
 function HeaderSpacer() {
-  return <div className="h-[120px] md:h-[160px]" />;
+  // matches header height for 140px logo + nav
+  return <div className="h-[150px] md:h-[160px]" />;
 }
 
 /* --------------------------------- Footer -------------------------------- */
@@ -157,7 +154,7 @@ function Footer({ t }) {
 
 /* --------------------------------- Pages -------------------------------- */
 function Home({ t }) {
-  // Icons for value cards to add visual interest
+  // Icons for value cards
   const valueIcons = [IconTarget, IconRocket, IconChart];
   return (
     <>
@@ -169,8 +166,9 @@ function Home({ t }) {
               {t.tagline}
             </p>
             <h1 className="mt-3 text-3xl font-bold leading-tight text-gray-900 md:text-5xl">
-              <span>{t.hero_line1}</span>
-              <span className="block">{t.hero_line2}</span>
+              {/* one-line English; two-line Chinese if hero_line2 exists */}
+              {t.hero_line1}
+              {t.hero_line2 && <span className="block">{t.hero_line2}</span>}
             </h1>
             <p className="mt-5 max-w-xl text-gray-600">{t.hero_sub}</p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -432,7 +430,6 @@ function InfoCard({ label, value }) {
 }
 
 /* ------------------------------ Tiny SVG Icons --------------------------- */
-/* (inline to avoid extra dependencies) */
 function IconInfo({ className = "w-4 h-4" }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -627,6 +624,7 @@ const i18n = {
     primary_cta: "View Services",
     secondary_cta: "About Us",
     tagline: "Consulting First · S2B2C Cross-Border Ecosystem",
+    // one-line English hero
     hero_line1: "MashBond — Let Asia Shine Globally",
     hero_line2: "",
     hero_sub:
